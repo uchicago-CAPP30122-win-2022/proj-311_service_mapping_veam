@@ -8,11 +8,10 @@ import csv
 
 
 # Read in data (CSV)
-census_tracts_raw = pd.read_csv("UChicago GDrive/CS 122/CS 122 Project/census_tracts_2010.csv", header=0, index="geoid10")
-census_tracts = census_tracts.loc[:, ['TRACTCE10', 'COMMAREA']]
-# census_tracts_geo = gpd.read_file("UChicago GDrive/CS 122/CS 122 Project/census_tracts_2010.geojson")
+census_tracts_raw = pd.read_csv("data/census_tracts_2010.csv", header=0, index="geoid10")
+census_tracts = census_tracts_raw.loc[:, ['TRACTCE10', 'COMMAREA']]
 
-# Remove duplciates (even if there aren't any)
+# Confirm no duplicates (there shouldn't be any)
 assert not census_tracts.duplicated(subset="TRACTCE10").any()
 
 # Make dictionaries for census tract to Chicago Community Area (and vice versa)
