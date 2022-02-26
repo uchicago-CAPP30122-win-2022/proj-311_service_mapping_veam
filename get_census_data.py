@@ -1,9 +1,34 @@
+'''
+File to take ACS demogrphic data and group into community areas
+'''
+
 import censusdata
 import pandas as pd
 import regex as re
+from mapping import create_dictionaries 
 
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('display.precision', 2)
+
+tract_cca_d, _ = create_dictionaries()
+
+def go(percentage=False):
+    '''
+    Runs the files functions to return a df of demos grouped by cca
+    
+    Input:
+        Percentage (boolean): Determines if you get absolute figures vs. % for
+            each demographic category
+    Returns (pd.DataFrame): Dataframe of demos
+    '''
+    assert type(percentage) == bool, 'enter True if you want %, False if you want absolute demo values'
+    cookbg = get_data_tract_acs()
+    cookbg_tracts = parse_geographic_tract_label(cookbg)
+    cookbg_filtered = filter_and_groupby_cca(tract_cca_d, cookbg_tracts)
+    if not percentage:
+        return cookbg_filtered
+    return get_percentage_info(cookbg_filtered)
+
 
 def get_data_tract_acs():
     '''
@@ -28,7 +53,7 @@ def get_data_tract_acs():
     
     cookbg = censusdata.download('acs5', 2015,
                              censusdata.censusgeo([('state', '17'), ('county', '031'), ('tract', '*')]),
-                             ['B23025_003E', 'B23025_005E', 'B19013_001E',
+                             ['B23025_003E', 'B23025_005E',
                              'B19001_001E', 'B19001_002E', 'B19001_003E',
                              'B19001_004E', 'B19001_005E', 'B19001_006E',
                              'B19001_007E', 'B19001_008E', 'B19001_009E',
@@ -39,46 +64,21 @@ def get_data_tract_acs():
                              'C17002_005E', 'C17002_006E', 'C17002_007E',
                              'C17002_008E', 'B02001_001E', 'B02001_002E',
                              'B02001_003E', 'B02001_004E', 'B02001_005E',
-                             'B02001_006E', 'B02001_007E', 'B02001_008E',
-                             'B02001_009E', 'B02001_010E'])
-    cookbg['B02001_008E'] = cookbg.B02001_008E + cookbg.B02001_009E + cookbg.B02001_010E
-    cookbg.drop(['B02001_009E', 'B02001_010E'], axis = 1, inplace=True)
+                             'B02001_006E', 'B02001_007E', 'B02001_008E'])
     cookbg.columns = ['in_labor_force', 'unemployed_in_labor_force',
-                     'LTM_median_household_income', 'total_num_income_estimates',
-                     'LTM_sub_10k', 'LTM_10_15k', 'LTM_15_20k', 'LTM_20_25k',
-                     'LTM_25_30k', 'LTM_30_35k', 'LTM_35_40k', 'LTM_40_45k',
-                     'LTM_45_50k', 'LTM_50_60k', 'LTM_60_75k', 'LTM_75_100k',
-                     'LTM_100_125k', 'LTM_125_150k', 'LTM_150_200k', 'LTM_200k+',
-                     'total_num_poverty_ratio_estimates', 'sub_0.50', '0.50_1.00',
-                     '1.00_1.25', '1.25_1.50', '1.50_1.85', '1.85_2.00', '2.00+',
-                     'total_num_race_estimates', 'White',
+                     'total_num_income_estimates', 'LTM_sub_10k', 'LTM_10_15k',
+                     'LTM_15_20k', 'LTM_20_25k', 'LTM_25_30k', 'LTM_30_35k',
+                     'LTM_35_40k', 'LTM_40_45k', 'LTM_45_50k', 'LTM_50_60k',
+                     'LTM_60_75k', 'LTM_75_100k', 'LTM_100_125k',
+                     'LTM_125_150k', 'LTM_150_200k', 'LTM_200k+',
+                     'total_num_poverty_ratio_estimates', 'sub_0.50',
+                     '0.50_1.00', '1.00_1.25', '1.25_1.50', '1.50_1.85',
+                     '1.85_2.00', '2.00+', 'total_num_race_estimates', 'White',
                      'Black_or_African_American',
                      'American_Indian_or_Alaska_Native', 'Asian',
                      'Native_Hawaiian_or_Other_Pacific_Islander',
                      'some_other_race_alone', 'two_or_more_races']
     return cookbg
-
-
-def get_data_tract_census(year):
-    '''
-    Downloads relevant data from census
-
-    Input: Year (int): year to get data
-
-    Returns (pd.DataFrame): tract level population for cook county, IL
-    '''
-    # censusdata.printtable(censusdata.censustable('sf1', 2000, 'P001001'))
-    # censusdata.printtable(censusdata.censustable('sf1', 2010, 'P001001'))
-
-    assert year % 10 == 0, "enter a decennial year"
-
-    df = censusdata.download('sf1', year,
-           censusdata.censusgeo([('state', '17'), ('county', '031'), 
-                                 ('tract', '*')]),
-           ["P001001"])
-    df.columns = ['population']
-
-    return df
 
 
 def parse_geographic_tract_label(df):
@@ -105,19 +105,25 @@ def parse_geographic_tract_label(df):
     return output
 
 
-def filter(lb, ub, df):
+def filter_and_groupby_cca(tract_d, df):
     '''
     Filters out tracts to only those we want
     
     Inputs:
-        lb (int): lower bound to extract
-        ub (int): upper bound to extract (inclsuve)
+        tract_d (dict): dictionary containing tract: cca pairings
         df (pd.DataFrame): block group level demographics for cook county, IL
         filter_on
 
-    Returns (pd.DataFrame): Demos filtered by tract 
+    Returns (pd.DataFrame): Demos filtered by tract with new col for cca
     '''
-    return df[(df['tract'] <= ub) & (df['tract'] >= lb)]
+    tracts = set()
+    for tract in tract_d:
+        tracts.add(tract)
+    filtered_df = df[(df['tract'].isin(tracts))].copy()
+    cols = filtered_df.columns
+    cols = cols[:-1] # Remove tract from columns we want to utilize
+    filtered_df['cca'] = filtered_df['tract'].map(tract_cca_d)
+    return filtered_df.groupby('cca')[cols].sum().reset_index()
 
 
 def get_percentage_info(df):
@@ -129,8 +135,8 @@ def get_percentage_info(df):
     Returns (pd.DataFrame): Relevant demographics in percentage for use
     '''
     output = pd.DataFrame()
+    output['cca'] = df['cca']
     output['percent_unemployed'] = df.unemployed_in_labor_force / df.in_labor_force
-    output['LTM_median_household_income'] = df.LTM_median_household_income
     output['LTM_income_sub_10k'] = df.LTM_sub_10k / df.total_num_income_estimates
     output['LTM_income_10-15k'] = df.LTM_10_15k / df.total_num_income_estimates
     output['LTM_income_15_20k'] = df.LTM_15_20k / df.total_num_income_estimates
