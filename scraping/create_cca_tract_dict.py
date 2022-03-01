@@ -1,10 +1,6 @@
 # Creating a dictionary that maps census tract to community area (neighborhood)
-# and vice versa
 
-# Import statements
-# import geopandas as gpd
 import pandas as pd
-import csv
 
 def create_dictionaries():
     '''
