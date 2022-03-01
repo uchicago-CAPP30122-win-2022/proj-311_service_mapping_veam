@@ -12,8 +12,7 @@ def create_dictionaries():
     
     Inputs: None
     
-    Returns (2 dictionaries): 1) Tract: community area;
-                              2) community area: list of tracts
+    Returns (dictionary): Tract: community area;
     '''
     # Read in data (CSV)
     census_tracts_raw = pd.read_csv("data/census_tracts_2010.csv", header=0, index_col="GEOID10")
@@ -22,14 +21,11 @@ def create_dictionaries():
     # Confirm no duplicates (there shouldn't be any)
     assert not census_tracts.duplicated(subset="TRACTCE10").any()
 
-    # Make dictionaries for census tract to Chicago Community Area (and vice versa)
     tract_cca_dict = {}
-    cca_tract_dict = {}
 
     for row in census_tracts.iloc:
         tract = row["TRACTCE10"] / 100 #Final two digits are block group
         cca = row["COMMAREA"]
         tract_cca_dict[tract] = cca
-        cca_tract_dict[cca] = cca_tract_dict.get(cca, []) + [tract]
     
-    return tract_cca_dict, cca_tract_dict
+    return tract_cca_dict

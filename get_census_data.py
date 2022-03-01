@@ -10,7 +10,7 @@ from mapping import create_dictionaries
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('display.precision', 2)
 
-tract_cca_d, _ = create_dictionaries()
+tract_cca_d = create_dictionaries()
 
 def go(percentage=False):
     '''
