@@ -1,40 +1,15 @@
 '''
 A file to create our website in plotly
 '''
-
-# from urlib.request import urlopen
-# import json
-# import geojson
-
-# import geopandas as gpd
-
-
-
-
-#data.iloc[0].features
-# Features
-    # {'type': 'Feature',
-    # 'properties': {'community': 'DOUGLAS',
-    # 'area': '0',
-    # 'shape_area': '46004621.1581',
-    # 'perimeter': '0',
-    # 'area_num_1': '35',
-    # 'area_numbe': '35',
-    # 'comarea_id': '0',
-    # 'comarea': '0',
-    # 'shape_len': '31027.0545098'},
-    # 'geometry': {'type': 'MultiPolygon',
-    # 'coordinates': [[[[-87.60914087617894, 41.84469250265398], etc.
-
-# fig = px.choropleth(census_data, geojson=data_json, locations='cca', color='percent_unemployed', color_continuous_scale="Viridis", range_color = (0,12), scope='usa', labels={'percent_unemployed':'enemployment rate'})
-
-
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
+
+# https://plotly.com/python/choropleth-maps/
+# https://www.youtube.com/watch?v=hSPmj7mK6ng&list=TLPQMDIwMzIwMjK-RX-K6Ja5bw&index=5
 
 app = dash.Dash(__name__)
 
@@ -103,41 +78,4 @@ def update_graph(race):
 if __name__ == '__main__':
     app.run_server(debug=True)
 
-
-# token = open(".mapbox_token").read() # you will need your own token
-
-# df = px.data.election()
-# geojson = px.data.election_geojson()
-# candidates = df.winner.unique()
-
-# app = dash.Dash(__name__)
-
-# app.layout = html.Div([
-#     html.P("Candidate:"),
-#     dcc.RadioItems(
-#         id='candidate', 
-#         options=[{'value': x, 'label': x} 
-#                  for x in candidates],
-#         value=candidates[0],
-#         labelStyle={'display': 'inline-block'}
-#     ),
-#     dcc.Graph(id="choropleth"),
-# ])
-
-# @app.callback(
-#     Output("choropleth", "figure"), 
-#     [Input("candidate", "value")])
-# def display_choropleth(candidate):
-#     fig = px.choropleth_mapbox(
-#         df, geojson=geojson, color=candidate,
-#         locations="district", featureidkey="properties.district",
-#         center={"lat": 45.5517, "lon": -73.7073}, zoom=9,
-#         range_color=[0, 6500])
-#     fig.update_layout(
-#         margin={"r":0,"t":0,"l":0,"b":0},
-#         mapbox_accesstoken=token)
-
-#     return fig
-
-# app.run_server(debug=True)
 
