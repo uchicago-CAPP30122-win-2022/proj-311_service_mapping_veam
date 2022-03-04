@@ -5,7 +5,7 @@ File to take ACS demogrphic data and group into community areas
 import censusdata
 import pandas as pd
 import regex as re
-from create_cca_tract_dict import create_dictionaries 
+from .create_cca_tract_dict import create_dictionaries 
 
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('display.precision', 2)
@@ -28,7 +28,6 @@ def go(percentage=False):
     if not percentage:
         return cookbg_filtered
     return get_percentage_info(cookbg_filtered)
-
 
 def get_data_tract_acs():
     '''
@@ -136,35 +135,35 @@ def get_percentage_info(df):
     '''
     output = pd.DataFrame()
     output['cca'] = df['cca']
-    output['percent_unemployed'] = df.unemployed_in_labor_force / df.in_labor_force
-    output['LTM_income_sub_10k'] = df.LTM_sub_10k / df.total_num_income_estimates
-    output['LTM_income_10-15k'] = df.LTM_10_15k / df.total_num_income_estimates
-    output['LTM_income_15_20k'] = df.LTM_15_20k / df.total_num_income_estimates
-    output['LTM_income_20_25k'] = df.LTM_20_25k / df.total_num_income_estimates
-    output['LTM_income_25_30k'] = df.LTM_25_30k / df.total_num_income_estimates
-    output['LTM_income_30_35k'] = df.LTM_30_35k / df.total_num_income_estimates
-    output['LTM_income_35_40k'] = df.LTM_35_40k / df.total_num_income_estimates
-    output['LTM_income_40_45k'] = df.LTM_40_45k / df.total_num_income_estimates
-    output['LTM_income_45_50k'] = df.LTM_45_50k / df.total_num_income_estimates
-    output['LTM_income_50_60k'] = df.LTM_50_60k / df.total_num_income_estimates
-    output['LTM_income_60_75k'] = df.LTM_60_75k / df.total_num_income_estimates
-    output['LTM_income_75_100k'] = df.LTM_75_100k / df.total_num_income_estimates
-    output['LTM_income_100_125k'] = df.LTM_100_125k / df.total_num_income_estimates
-    output['LTM_income_125_150k'] = df.LTM_125_150k / df.total_num_income_estimates
-    output['LTM_income_150_200k'] = df.LTM_150_200k / df.total_num_income_estimates
-    output['LTM_income_200k+'] = df['LTM_200k+'] / df.total_num_income_estimates    
-    output['below_0.50_poverty_line'] = df['sub_0.50'] / df.total_num_poverty_ratio_estimates
-    output['0.50_1.00_poverty_line'] = df['0.50_1.00'] / df.total_num_poverty_ratio_estimates
-    output['1.00_1.25_poverty_line'] = df['1.00_1.25'] / df.total_num_poverty_ratio_estimates
-    output['1.25_1.50_poverty_line'] = df['1.25_1.50'] / df.total_num_poverty_ratio_estimates
-    output['1.50_1.85_poverty_line'] = df['1.50_1.85'] / df.total_num_poverty_ratio_estimates
-    output['1.85_2.00_poverty_line'] = df['1.85_2.00'] / df.total_num_poverty_ratio_estimates
-    output['2.00+_poverty_line'] = df['2.00+'] / df.total_num_poverty_ratio_estimates
-    output['White'] = df.White / df.total_num_race_estimates
-    output['Black_or_African_American'] = df.Black_or_African_American / df.total_num_race_estimates
-    output['American_Indian_or_Alaska_Native'] = df.American_Indian_or_Alaska_Native / df.total_num_race_estimates
-    output['Asian'] = df.Asian / df.total_num_race_estimates
-    output['Native_Hawaiian_or_Other_Pacific_Islander'] = df.Native_Hawaiian_or_Other_Pacific_Islander / df.total_num_race_estimates
-    output['some_other_race_alone'] = df.some_other_race_alone / df.total_num_race_estimates
-    output['two_or_more_races'] = df.two_or_more_races / df.total_num_race_estimates
+    output['percent_unemployed'] = df.unemployed_in_labor_force / df.in_labor_force * 100
+    output['LTM_income_sub_10k'] = df.LTM_sub_10k / df.total_num_income_estimates * 100
+    output['LTM_income_10-15k'] = df.LTM_10_15k / df.total_num_income_estimates * 100
+    output['LTM_income_15_20k'] = df.LTM_15_20k / df.total_num_income_estimates * 100
+    output['LTM_income_20_25k'] = df.LTM_20_25k / df.total_num_income_estimates * 100
+    output['LTM_income_25_30k'] = df.LTM_25_30k / df.total_num_income_estimates * 100
+    output['LTM_income_30_35k'] = df.LTM_30_35k / df.total_num_income_estimates * 100
+    output['LTM_income_35_40k'] = df.LTM_35_40k / df.total_num_income_estimates * 100
+    output['LTM_income_40_45k'] = df.LTM_40_45k / df.total_num_income_estimates * 100
+    output['LTM_income_45_50k'] = df.LTM_45_50k / df.total_num_income_estimates * 100
+    output['LTM_income_50_60k'] = df.LTM_50_60k / df.total_num_income_estimates * 100
+    output['LTM_income_60_75k'] = df.LTM_60_75k / df.total_num_income_estimates * 100
+    output['LTM_income_75_100k'] = df.LTM_75_100k / df.total_num_income_estimates * 100
+    output['LTM_income_100_125k'] = df.LTM_100_125k / df.total_num_income_estimates * 100
+    output['LTM_income_125_150k'] = df.LTM_125_150k / df.total_num_income_estimates * 100
+    output['LTM_income_150_200k'] = df.LTM_150_200k / df.total_num_income_estimates * 100
+    output['LTM_income_200k+'] = df['LTM_200k+'] / df.total_num_income_estimates * 100
+    output['below_0.50_poverty_line'] = df['sub_0.50'] / df.total_num_poverty_ratio_estimates * 100
+    output['0.50_1.00_poverty_line'] = df['0.50_1.00'] / df.total_num_poverty_ratio_estimates * 100
+    output['1.00_1.25_poverty_line'] = df['1.00_1.25'] / df.total_num_poverty_ratio_estimates * 100
+    output['1.25_1.50_poverty_line'] = df['1.25_1.50'] / df.total_num_poverty_ratio_estimates * 100
+    output['1.50_1.85_poverty_line'] = df['1.50_1.85'] / df.total_num_poverty_ratio_estimates * 100
+    output['1.85_2.00_poverty_line'] = df['1.85_2.00'] / df.total_num_poverty_ratio_estimates * 100
+    output['2.00+_poverty_line'] = df['2.00+'] / df.total_num_poverty_ratio_estimates * 100
+    output['White'] = df.White / df.total_num_race_estimates * 100
+    output['Black_or_African_American'] = df.Black_or_African_American / df.total_num_race_estimates * 100
+    output['American_Indian_or_Alaska_Native'] = df.American_Indian_or_Alaska_Native / df.total_num_race_estimates * 100
+    output['Asian'] = df.Asian / df.total_num_race_estimates * 100
+    output['Native_Hawaiian_or_Other_Pacific_Islander'] = df.Native_Hawaiian_or_Other_Pacific_Islander / df.total_num_race_estimates * 100
+    output['some_other_race_alone'] = df.some_other_race_alone / df.total_num_race_estimates * 100
+    output['two_or_more_races'] = df.two_or_more_races / df.total_num_race_estimates * 100
     return output
