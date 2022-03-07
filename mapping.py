@@ -1,12 +1,16 @@
 '''
 A file to create our website in plotly
 '''
+# LIST OF THINGS LATER?
+# do color scheme 0 to max(percent of category) instead of 0-100
+
 import dash
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
+import geopandas as gpd
 
 # https://plotly.com/python/choropleth-maps/
 # https://www.youtube.com/watch?v=hSPmj7mK6ng&list=TLPQMDIwMzIwMjK-RX-K6Ja5bw&index=5
@@ -20,7 +24,7 @@ import scraping.get_census_data as cen_scrape
 # TBD if we want to just have demos in a ready made csv to avoid scarping; I think so ###############################################
 census_data = cen_scrape.go(True)
 census_data["cca"] = census_data["cca"].astype(str)
-geojson = pd.read_json("data/community_areas.geojson")
+geojson = gpd.read_file("data/community_areas.geojson")
 
 # -----------------------------------------------------------
 # App layout
@@ -63,7 +67,7 @@ def update_graph(race):
         locations="cca",
         featureidkey="properties.area_numbe",
         projection="mercator", 
-        range_color=[0,1]
+        range_color=[0,100]
         )
 
     fig.update_geos(fitbounds='locations', visible=False)       
@@ -71,9 +75,6 @@ def update_graph(race):
     return fig
 
 
-# data_json = data['features']
-# data.features[0]["properties"]["area_numbe"]
-# data2 = pd.read_csv('data/CommAreas.csv')
 
 if __name__ == '__main__':
     app.run_server(debug=True)
