@@ -12,22 +12,23 @@ pd.set_option('display.precision', 2)
 
 tract_cca_d = create_dictionaries()
 
-def go(percentage=False):
+def go(filepath="data/census_demos.csv", percentage=True):
     '''
     Runs the files functions to return a df of demos grouped by cca
     
     Input:
-        Percentage (boolean): Determines if you get absolute figures vs. % for
+        filepath (filepath): Where to save csv
+        percentage (boolean): Determines if you get absolute figures vs. % for
             each demographic category
-    Returns (pd.DataFrame): Dataframe of demos
+    Returns (csv): csv of demos
     '''
     assert type(percentage) == bool, 'enter True if you want %, False if you want absolute demo values'
     cookbg = get_data_tract_acs()
     cookbg_tracts = parse_geographic_tract_label(cookbg)
     cookbg_filtered = filter_and_groupby_cca(tract_cca_d, cookbg_tracts)
-    if not percentage:
-        return cookbg_filtered
-    return get_percentage_info(cookbg_filtered)
+    if percentage:
+        cookbg_filtered = get_percentage_info(cookbg_filtered)
+    return cookbg_filtered.to_csv(filepath)
 
 def get_data_tract_acs():
     '''
@@ -167,3 +168,6 @@ def get_percentage_info(df):
     output['some_other_race_alone'] = df.some_other_race_alone / df.total_num_race_estimates * 100
     output['two_or_more_races'] = df.two_or_more_races / df.total_num_race_estimates * 100
     return output
+
+if __name__ == '__main__':
+    go(filepath="data/census_demos.csv", percentage=True)
