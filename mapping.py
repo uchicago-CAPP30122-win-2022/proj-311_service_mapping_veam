@@ -19,11 +19,8 @@ app = dash.Dash(__name__)
 
 # -----------------------------------------------------------
 # Import and clean data
-import scraping.get_census_data as cen_scrape
-
-# TBD if we want to just have demos in a ready made csv to avoid scarping; I think so ###############################################
-census_data = cen_scrape.go(True)
-census_data["cca"] = census_data["cca"].astype(str)
+census_data = pd.read_csv("data/census_demos.csv")
+census_data["cca_num"] = census_data["cca_num"].astype(str)
 geojson = gpd.read_file("data/community_areas.geojson")
 
 # -----------------------------------------------------------
@@ -64,13 +61,15 @@ def update_graph(race):
         data_frame=census_data,
         geojson=geojson,
         color=race,
-        locations="cca",
+        locations="cca_num",
         featureidkey="properties.area_numbe",
         projection="mercator", 
-        range_color=[0,100]
+        range_color=[0,100],
+        width=800,
+        height=1000
         )
 
-    fig.update_geos(fitbounds='locations', visible=False)       
+    fig.update_geos(fitbounds='locations', visible=False)
 
     return fig
 
