@@ -5,29 +5,33 @@ File to take ACS demogrphic data and group into community areas
 import censusdata
 import pandas as pd
 import regex as re
-from .create_cca_tract_dict import create_dictionaries 
+from create_cca_tract_dict import create_dictionaries 
 
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('display.precision', 2)
 
-tract_cca_d = create_dictionaries()
+tract_cca_d, comm_area_dict = create_dictionaries()
 
-def go(percentage=False):
+def go(filepath="data/census_demos.csv", percentage=True):
     '''
     Runs the files functions to return a df of demos grouped by cca
     
     Input:
-        Percentage (boolean): Determines if you get absolute figures vs. % for
+        filepath (filepath): Where to save csv
+        percentage (boolean): Determines if you get absolute figures vs. % for
             each demographic category
-    Returns (pd.DataFrame): Dataframe of demos
+    Returns (csv): csv of demos
     '''
     assert type(percentage) == bool, 'enter True if you want %, False if you want absolute demo values'
     cookbg = get_data_tract_acs()
     cookbg_tracts = parse_geographic_tract_label(cookbg)
     cookbg_filtered = filter_and_groupby_cca(tract_cca_d, cookbg_tracts)
-    if not percentage:
-        return cookbg_filtered
-    return get_percentage_info(cookbg_filtered)
+    if percentage:
+        cookbg_filtered = get_percentage_info(cookbg_filtered)
+    cookbg_filtered['cca_name'] = cookbg_filtered['cca_num'].map(comm_area_dict)
+    names = cookbg_filtered.pop('cca_name')
+    cookbg_filtered.insert(0, 'cca_name', names)
+    return cookbg_filtered.to_csv(filepath)
 
 def get_data_tract_acs():
     '''
@@ -121,8 +125,8 @@ def filter_and_groupby_cca(tract_d, df):
     filtered_df = df[(df['tract'].isin(tracts))].copy()
     cols = filtered_df.columns
     cols = cols[:-1] # Remove tract from columns we want to utilize
-    filtered_df['cca'] = filtered_df['tract'].map(tract_cca_d)
-    return filtered_df.groupby('cca')[cols].sum().reset_index()
+    filtered_df['cca_num'] = filtered_df['tract'].map(tract_cca_d)
+    return filtered_df.groupby('cca_num')[cols].sum().reset_index()
 
 
 def get_percentage_info(df):
@@ -134,7 +138,7 @@ def get_percentage_info(df):
     Returns (pd.DataFrame): Relevant demographics in percentage for use
     '''
     output = pd.DataFrame()
-    output['cca'] = df['cca']
+    output['cca_num'] = df['cca_num']
     output['percent_unemployed'] = df.unemployed_in_labor_force / df.in_labor_force * 100
     output['LTM_income_sub_10k'] = df.LTM_sub_10k / df.total_num_income_estimates * 100
     output['LTM_income_10-15k'] = df.LTM_10_15k / df.total_num_income_estimates * 100
@@ -166,4 +170,9 @@ def get_percentage_info(df):
     output['Native_Hawaiian_or_Other_Pacific_Islander'] = df.Native_Hawaiian_or_Other_Pacific_Islander / df.total_num_race_estimates * 100
     output['some_other_race_alone'] = df.some_other_race_alone / df.total_num_race_estimates * 100
     output['two_or_more_races'] = df.two_or_more_races / df.total_num_race_estimates * 100
+    output = output.round(2) # Round off data off to two decimal places
+    output['cca_num'].astype(int)
     return output
+
+if __name__ == '__main__':
+    go(filepath="data/census_demos.csv", percentage=True)
