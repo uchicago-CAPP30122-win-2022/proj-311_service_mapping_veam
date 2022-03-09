@@ -238,23 +238,23 @@ def update_graph(overall_filter, demo, secondary_demo, race2):
     
     # Set up title info and output_col_title
     if overall_filter == 'Race':
-        output_lab = race_value_to_label[demo]
+        output_lab = "%" + race_value_to_label[demo]
         title_label = output_lab.lower()
         demo_output[output_lab] = demo_output['output_col']
     elif overall_filter == 'Unemployment':
         title_label = unemployment_value_to_label[demo].lower()
-        output_lab = 'Unemp.'
+        output_lab = '% Unemp.'
         demo_output[output_lab] = demo_output['output_col']
     else:
         min_label = min_income_value_to_label[demo]
         max_label = max_income_value_to_label[secondary_demo]
         if max_label == "No max":
             title_label = "making over " + min_label + " per year"
-            output_lab = '>' + min_label
+            output_lab = '% >' + min_label
             demo_output[output_lab] = demo_output['output_col']
         else:
             title_label = "making between " + min_label + " - " + max_label + " per year"
-            output_lab = min_label + " - " + max_label
+            output_lab = "% b/t " + min_label + " - " + max_label
             demo_output[output_lab] = demo_output['output_col']
     
     # Set zoom bounds
