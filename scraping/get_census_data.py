@@ -170,7 +170,7 @@ def get_percentage_info(df):
     output['Native_Hawaiian_or_Other_Pacific_Islander'] = df.Native_Hawaiian_or_Other_Pacific_Islander / df.total_num_race_estimates * 100
     output['some_other_race_alone'] = df.some_other_race_alone / df.total_num_race_estimates * 100
     output['two_or_more_races'] = df.two_or_more_races / df.total_num_race_estimates * 100
-    output.round(2)
+    output = output.round(2) # Round off data off to two decimal places
     output['cca_num'].astype(int)
     return output
 
