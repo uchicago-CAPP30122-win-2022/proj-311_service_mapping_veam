@@ -3,7 +3,7 @@ A file to create our website in plotly
 '''
 # LIST OF THINGS LATER?
 # do color scheme 0 to max(percent of category) instead of 0-100 (change per income vs. race vs. unemployment)
-# add filter for other categories (subfilters)
+# Revise titles dynamically
 # connect 311 data to 2nd graph
 # fix hover labels (show percentages instead of ratio)
 # replicate with scatterplot and bar plot (on the bottom)
@@ -34,8 +34,40 @@ census_data = pd.read_csv("data/census_demos.csv")
 census_data["cca_num"] = census_data["cca_num"].astype(str)
 geojson = gpd.read_file("data/community_areas.geojson")
 
-# Create dictionary needed for multi-layer drop level
-all_options = {
+
+# Set up subsets of data for filtering later on
+baseline_cols = census_data[['cca_num', 'cca_name']]
+race_cols = ["White", "Black_or_African_American",
+             "American_Indian_or_Alaska_Native", "Asian",
+             "Native_Hawaiian_or_Other_Pacific_Islander",
+             "some_other_race_alone", "two_or_more_races"]
+unemployment_cols = ['percent_unemployed']
+income_cols = ["LTM_income_sub_10k", "LTM_income_10-15k", "LTM_income_15_20k",
+                "LTM_income_20_25k", "LTM_income_25_30k", "LTM_income_30_35k",
+                "LTM_income_35_40k", "LTM_income_40_45k", "LTM_income_45_50k",
+                "LTM_income_50_60k", "LTM_income_60_75k", "LTM_income_75_100k",
+                "LTM_income_100_125k", "LTM_income_125_150k",
+                "LTM_income_150_200k", "LTM_income_200k+"]
+max_income_tuples = [("$10k", "LTM_income_sub_10k"),
+                     ("$15k", "LTM_income_10-15k"),
+                     ("$20k", "LTM_income_15_20k"),
+                     ("$25k", "LTM_income_20_25k"),
+                     ("$30k", "LTM_income_25_30k"),
+                     ("$35k", "LTM_income_30_35k"),
+                     ("$40k", "LTM_income_35_40k"),
+                     ("$45k", "LTM_income_40_45k"),
+                     ("$50k", "LTM_income_45_50k"),
+                     ("$60k", "LTM_income_50_60k"),
+                     ("$75k", "LTM_income_60_75k"),
+                     ("$100k", "LTM_income_75_100k"),
+                     ("$125k", "LTM_income_100_125k"),
+                     ("$150k", "LTM_income_125_150k"),
+                     ("$200k", "LTM_income_150_200k"),
+                     ("No max", "LTM_income_200k+")]
+
+
+# Create dictionaries needed for multi-layer drop level
+second_filter = {
     'Race': {"White": "White",
              "Black": "Black_or_African_American",
              "Native American": "American_Indian_or_Alaska_Native",
@@ -43,23 +75,46 @@ all_options = {
              "Native Hawaiian or Other Pacific Islander": "Native_Hawaiian_or_Other_Pacific_Islander",
              "Other single race": "some_other_race_alone",
              "2+ races": "two_or_more_races"},
-    'Min annual income': {"$0": "LTM_income_sub_10k",
-                         "$10k": "LTM_income_10-15k",
-                         "$15k": "LTM_income_15_20k",
-                         "$20k": "LTM_income_20_25k",
-                         "$25k": "LTM_income_25_30k",
-                         "$30k": "LTM_income_30_35k",
-                         "$35k": "LTM_income_35_40k",
-                         "$40k": "LTM_income_40_45k",
-                         "$45k": "LTM_income_45_50k",
-                         "$50k": "LTM_income_50_60k",
-                         "$60k": "LTM_income_60_75k",
-                         "$75k": "LTM_income_75_100k",
-                         "$100k": "LTM_income_100_125k",
-                         "$125k": "LTM_income_125_150k",
-                         "$150k": "LTM_income_150_200k",
-                         "$200k": "LTM_income_200k+"},
-    #'Income': 
+    'Range of annual incomes': {"$0": "LTM_income_sub_10k",
+                                "$10k": "LTM_income_10-15k",
+                                "$15k": "LTM_income_15_20k",
+                                "$20k": "LTM_income_20_25k",
+                                "$25k": "LTM_income_25_30k",
+                                "$30k": "LTM_income_30_35k",
+                                "$35k": "LTM_income_35_40k",
+                                "$40k": "LTM_income_40_45k",
+                                "$45k": "LTM_income_45_50k",
+                                "$50k": "LTM_income_50_60k",
+                                "$60k": "LTM_income_60_75k",
+                                "$75k": "LTM_income_75_100k",
+                                "$100k": "LTM_income_100_125k",
+                                "$125k": "LTM_income_125_150k",
+                                "$150k": "LTM_income_150_200k",
+                                "$200k": "LTM_income_200k+"},
+    'Unemployment': {"Percent unemployed": "percent_unemployed"}
+    }
+third_filter = {'Race': {"N/A": "N/A"},
+    # Not in use 'Range of annual incomes': 
+                            #    {"$10k": "LTM_income_sub_10k",
+                            #     "$15k": "LTM_income_10-15k",
+                            #     "$20k": "LTM_income_15_20k",
+                            #     "$25k": "LTM_income_20_25k",
+                            #     "$30k": "LTM_income_25_30k",
+                            #     "$35k": "LTM_income_30_35k",
+                            #     "$40k": "LTM_income_35_40k",
+                            #     "$45k": "LTM_income_40_45k",
+                            #     "$50k": "LTM_income_45_50k",
+                            #     "$60k": "LTM_income_50_60k",
+                            #     "$75k": "LTM_income_60_75k",
+                            #     "$100k": "LTM_income_75_100k",
+                            #     "$125k": "LTM_income_100_125k",
+                            #     "$150k": "LTM_income_125_150k",
+                            #     "$200k": "LTM_income_150_200k",
+                            #     "No max": "LTM_income_200k+"},
+    'Unemployment': {"N/A": "N/A"}
+    } 
+
+#'Income': 
     # 
              #{'Min': [("$0", "LTM_income_sub_10k"),
     #                    ("$10k", "LTM_income_10-15k"),
@@ -93,130 +148,132 @@ all_options = {
     #                   ("$150k", "LTM_income_125_150k"),
     #                   ("$200k", "LTM_income_150_200k"),
     #                   ("No max", "LTM_income_200k+")]},
-    'Unemployment': {"Percent unemployed": "percent_unemployed"}
-    }
-maximum_income_d = {"$10k": "LTM_income_sub_10k",
-                    "$15k": "LTM_income_10-15k",
-                    "$20k": "LTM_income_15_20k",
-                    "$25k": "LTM_income_20_25k",
-                    "$30k": "LTM_income_25_30k",
-                    "$35k": "LTM_income_30_35k",
-                    "$40k": "LTM_income_35_40k",
-                    "$45k": "LTM_income_40_45k",
-                    "$50k": "LTM_income_45_50k",
-                    "$60k": "LTM_income_50_60k",
-                    "$75k": "LTM_income_60_75k",
-                    "$100k": "LTM_income_75_100k",
-                    "$125k": "LTM_income_100_125k",
-                    "$150k": "LTM_income_125_150k",
-                    "$200k": "LTM_income_150_200k",
-                    "No max": "LTM_income_200k+"}
 
 # -----------------------------------------------------------
 # App layout
 
 app.layout = dbc.Container([
-    dbc.Row(dbc.Col(
-        html.H1("How Neighborhood Demographics Impact 311 Responsiveness", style={'text-align': 'center', 'font-family': 'Helvetica'}))#,
+    dbc.Row(
+        html.H1("How Neighborhood Demographics Impact 311 Responsiveness", style={'text-align': 'center', 'font-family': 'Helvetica'})
     ),
 
-    dbc.Row([
-        dbc.Col([
-            dcc.Dropdown(id="select_first_filter",
-                        options =[
+    dbc.Row(
+        [
+            dcc.Dropdown(id="primary_filter",
+                         options =[
                             {"label": "Race", "value": "Race"},
-                            {"label": "Minimum annual income", "value": "Min annual income"},
+                            {"label": "Range of annual incomes", "value": "Range of annual incomes"},
                             {"label": "Unemployment", "value": "Unemployment"}],
-                        multi = False,
-                        value = "Race",
-                        style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
+                         multi = False,
+                         value = "Race",
+                         style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
                         ),
-
-            # Graph 1 duplicate
             dcc.Dropdown(id="select_race2",
                         options =[
-                            {"label": "White", "value": "White"},
-                            {"label": "Black", "value": "Black_or_African_American"},
-                            {"label": "Native American", "value": "American_Indian_or_Alaska_Native"},
-                            {"label": "Asian", "value": "Asian"},
-                            {"label": "Native_Hawaiian_or_Other_Pacific_Islander", "value": "Native_Hawaiian_or_Other_Pacific_Islander"},
-                            {"label": "Other single race", "value": "some_other_race_alone"},
-                            {"label": "2+ races", "value": "two_or_more_races"}],
+                                 {"label": "White", "value": "White"},
+                                 {"label": "Black", "value": "Black_or_African_American"},
+                                 {"label": "Native American", "value": "American_Indian_or_Alaska_Native"},
+                                 {"label": "Asian", "value": "Asian"},
+                                 {"label": "Native_Hawaiian_or_Other_Pacific_Islander", "value": "Native_Hawaiian_or_Other_Pacific_Islander"},
+                                 {"label": "Other single race", "value": "some_other_race_alone"},
+                                 {"label": "2+ races", "value": "two_or_more_races"}],
                         multi = False,
                         value = "White",
                         style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
-                        ),
-            # Graph 1 second-level dropdown
+                        )
+        ]
+        ),
+    dbc.Row(
+    # Graph 1 second-level dropdown
             dcc.Dropdown(id="secondary_filter",
                          style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center'}
-                         ),
-
-            ])
-
-        ]),
-
+                        )
+        ),
+    dbc.Row(
+    # Graph 1 third-level dropdown
+            dcc.Dropdown(id="tertiary_filter",
+                         style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center'}
+                        )
+        ),
     dbc.Row([
-        dbc.Col([
-
             dcc.Graph(id='demo_map', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
             dcc.Graph(id='demo_map2', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'})
-            
-            ])
-
-        ])
+            ]),
 
     ], fluid=True)
 
 # -----------------------------------------------------------
 # Connect the Plotly graphs with Dash Componenets
+# First and second filter
 @app.callback(
     dash.dependencies.Output('secondary_filter', 'options'),
-    [dash.dependencies.Input('select_first_filter', 'value')]
+    dash.dependencies.Output('secondary_filter', 'value'),
+    [dash.dependencies.Input('primary_filter', 'value')]
     )
 
-# def get_data(option):
-#     '''
-#     Updates data frame for filtering values
-#     '''
-#     if option == 'Race' or option == 'Unemployment':
-#         output = census_data[['cca_name', 'cca_']
-
-def set_second_options(option):
+def set_second_options_and_value(option):
     '''
     Updates secondary filter options
     '''
-    return [{'label': k, 'value': v} for k,v in all_options[option].items()]
+    options = [{'label': k, 'value': v} for k,v in second_filter[option].items()]
+    return options, options[0]['value']
 
+# Third filter
 @app.callback(
-    dash.dependencies.Output('secondary_filter', 'value'),
-    [dash.dependencies.Input('secondary_filter', 'options')]
+    dash.dependencies.Output('tertiary_filter', 'options'),
+    dash.dependencies.Output('tertiary_filter', 'value'),
+    [dash.dependencies.Input('secondary_filter', 'value'),
+     dash.dependencies.Input('primary_filter', 'value')]
     )
 
-def set_second_value(options):
+def set_third_options(option, first_filter):
     '''
-    Updates secondary default value
+    Updates third filter options
     '''
-    return options[0]['value']
+    if first_filter != 'Range of annual incomes':
+        options =  [{'label': k, 'value': v} for k,v in third_filter[first_filter].items()]
+    else:
+        idx = income_cols.index(option)
+        options =  [{'label': l, 'value': v} for l,v in max_income_tuples[idx:]]
+    return options, options[0]['value']
+    
 
+# Make graphs
 @app.callback(
     [Output(component_id = 'demo_map', component_property='figure'),
     Output(component_id = 'demo_map2', component_property='figure')],
 
-    [Input(component_id = 'secondary_filter', component_property='value'),
+    [Input(component_id = 'primary_filter', component_property='value'),
+    Input(component_id = 'secondary_filter', component_property='value'),
+    Input(component_id = 'tertiary_filter', component_property='value'),
     Input(component_id = 'select_race2', component_property='value')]
     )
 
-def update_graph(race, race2):
+def update_graph(overall_filter, demo, secondary_demo, race2):
     '''
-    Updates graph based on race selected
+    Updates graph based on demo selected
     '''
+    if overall_filter == 'Race':
+        output_col = census_data[demo].copy()
+    elif overall_filter == 'Unemployment':
+        output_col = census_data[demo].copy()
+    else:
+        potential_incomes = census_data[income_cols].copy()
+        cols = potential_incomes.columns
+        min_idx = cols.get_loc(demo)
+        max_idx = cols.get_loc(secondary_demo)
+        to_sum = potential_incomes.iloc[:, min_idx: max_idx + 1]
+        output_col = to_sum.sum(axis=1)
 
+    demo_output = baseline_cols.copy()
+    demo_output.loc[:, 'output_col'] = output_col
+    
     # Set zoom bounds
 
     fig = px.choropleth_mapbox(
-        data_frame=census_data,
+        data_frame=demo_output,
         geojson=geojson,
-        color=race,
+        color='output_col',
         color_continuous_scale='blues',
         locations="cca_num",
         zoom=9, 
@@ -226,9 +283,9 @@ def update_graph(race, race2):
         mapbox_style="open-street-map",
         # projection="mercator",
         hover_name="cca_name",
-        hover_data=[race],
+        hover_data=['output_col'],
         range_color=[0,100],
-        title=f"% {race} by Chicago Neighobrhood (ACS 2019)"
+        title=f"% {demo} by Chicago Neighobrhood (ACS 2019)"
         # width=400,
         # height=800
         )
