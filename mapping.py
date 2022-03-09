@@ -3,7 +3,6 @@ A file to create our website in plotly
 '''
 # LIST OF THINGS LATER?
 # do color scheme 0 to max(percent of category) instead of 0-100
-# move race dropdown to the right
 # add filter for other categories (subfilters)
 # connect 311 data to 2nd graph
 # fix hover labels (show percentages instead of ratio)
@@ -21,6 +20,7 @@ import dash
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output
+import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
 import geopandas as gpd
@@ -39,13 +39,13 @@ geojson = gpd.read_file("data/community_areas.geojson")
 # -----------------------------------------------------------
 # App layout
 
-app.layout = html.Div(className="map", children=[
-    html.H1("How demographics impact 311 data", style={'text-align': 'center'}),
+app.layout = dbc.Container([
+    dbc.Row(dbc.Col(
+        html.H1("How demographics impact 311 data", style={'text-align': 'center'}))#,
+    ),
 
-    # children=[
-
-        html.Div(className="DCC", children=[
-            # Graph 1
+    dbc.Row([
+        dbc.Col([
             dcc.Dropdown(id="select_race",
                         options =[
                             {"label": "White", "value": "White"},
@@ -55,11 +55,10 @@ app.layout = html.Div(className="map", children=[
                             {"label": "Native_Hawaiian_or_Other_Pacific_Islander", "value": "Native_Hawaiian_or_Other_Pacific_Islander"},
                             {"label": "Other single race", "value": "some_other_race_alone"},
                             {"label": "2+ races", "value": "two_or_more_races"}],
-                        multi = False, # Put to True, fix app callback
+                        multi = False,
                         value = "White",
-                        style = {'width': '40%', 'display': 'inline-block', 'text-align': 'left'}
+                        style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center'}
                         ),
-            html.Br(),
 
             # Graph 1 duplicate
             dcc.Dropdown(id="select_race2",
@@ -73,20 +72,24 @@ app.layout = html.Div(className="map", children=[
                             {"label": "2+ races", "value": "two_or_more_races"}],
                         multi = False,
                         value = "White",
-                        style = {'width': '40%', 'display': 'inline-block', 'text-align': 'right'}
-                        ),
-            html.Br()
+                        style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center'}
+                        )
+
+            ])
 
         ]),
 
-        html.Div(className="Maps", children=[
+    dbc.Row([
+        dbc.Col([
 
             dcc.Graph(id='demo_map', figure={}, style = {'display': 'inline-block'}),
             dcc.Graph(id='demo_map2', figure={}, style = {'display': 'inline-block'})
             
             ])
-    ]
-    )
+
+        ])
+
+    ], fluid=True)
 
 # -----------------------------------------------------------
 # Connect the Plotly graphs with Dash Componenets
@@ -111,7 +114,8 @@ def update_graph(race, race2):
         projection="mercator",
         hover_name="cca_name",
         hover_data=[race],
-        range_color=[0,100]
+        range_color=[0,100],
+        title=f"% {race} by Chicago Neighobrhood (ACS 2019)"
         # width=400,
         # height=800
         )
@@ -125,7 +129,8 @@ def update_graph(race, race2):
         projection="mercator", 
         range_color=[0,100],
         hover_name="cca_name",
-        hover_data=[race2]
+        hover_data=[race2],
+        title=f"% {race2} by Chicago Neighborhood (Chicago 311 Requests)"
         # width=400,
         # height=800
         )
