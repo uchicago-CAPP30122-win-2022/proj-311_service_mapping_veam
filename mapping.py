@@ -2,14 +2,11 @@
 A file to create our website in plotly
 '''
 # LIST OF THINGS LATER?
-# do color scheme 0 to max(percent of category) instead of 0-100
+# do color scheme 0 to max(percent of category) instead of 0-100 (change per income vs. race vs. unemployment)
 # add filter for other categories (subfilters)
 # connect 311 data to 2nd graph
 # fix hover labels (show percentages instead of ratio)
 # replicate with scatterplot and bar plot (on the bottom)
-# add headers for the graphs
-# slightly adjust graph sizes
-# font/color
 
 # LINKS
 # https://plotly.com/python/setting-graph-size/
