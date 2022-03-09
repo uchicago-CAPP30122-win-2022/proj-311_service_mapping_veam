@@ -24,6 +24,7 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
 import geopandas as gpd
+import numpy as np
 
 # https://plotly.com/python/choropleth-maps/
 # https://www.youtube.com/watch?v=hSPmj7mK6ng&list=TLPQMDIwMzIwMjK-RX-K6Ja5bw&index=5
@@ -41,7 +42,7 @@ geojson = gpd.read_file("data/community_areas.geojson")
 
 app.layout = dbc.Container([
     dbc.Row(dbc.Col(
-        html.H1("How demographics impact 311 data", style={'text-align': 'center'}))#,
+        html.H1("How Neighborhood Demographics Impact 311 Responsiveness", style={'text-align': 'center', 'font-family': 'Helvetica'}))#,
     ),
 
     dbc.Row([
@@ -57,7 +58,7 @@ app.layout = dbc.Container([
                             {"label": "2+ races", "value": "two_or_more_races"}],
                         multi = False,
                         value = "White",
-                        style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center'}
+                        style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
                         ),
 
             # Graph 1 duplicate
@@ -72,7 +73,7 @@ app.layout = dbc.Container([
                             {"label": "2+ races", "value": "two_or_more_races"}],
                         multi = False,
                         value = "White",
-                        style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center'}
+                        style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
                         )
 
             ])
@@ -82,8 +83,8 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
 
-            dcc.Graph(id='demo_map', figure={}, style = {'display': 'inline-block'}),
-            dcc.Graph(id='demo_map2', figure={}, style = {'display': 'inline-block'})
+            dcc.Graph(id='demo_map', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
+            dcc.Graph(id='demo_map2', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'})
             
             ])
 
@@ -105,13 +106,21 @@ def update_graph(race, race2):
     '''
     Updates graph based on race selected
     '''
-    fig = px.choropleth(
+
+    # Set zoom bounds
+
+    fig = px.choropleth_mapbox(
         data_frame=census_data,
         geojson=geojson,
         color=race,
+        color_continuous_scale='blues',
         locations="cca_num",
+        zoom=9, 
+        center = {"lat": 41.8, "lon": -87.75},
+        opacity=0.8,
         featureidkey="properties.area_numbe",
-        projection="mercator",
+        mapbox_style="open-street-map",
+        # projection="mercator",
         hover_name="cca_name",
         hover_data=[race],
         range_color=[0,100],
@@ -120,13 +129,18 @@ def update_graph(race, race2):
         # height=800
         )
 
-    fig2 = px.choropleth(
+    fig2 = px.choropleth_mapbox(
         data_frame=census_data,
         geojson=geojson,
         color=race2,
+        color_continuous_scale='blues',
         locations="cca_num",
+        zoom=9, 
+        center = {"lat": 41.8, "lon": -87.75},
+        opacity=0.8,
         featureidkey="properties.area_numbe",
-        projection="mercator", 
+        mapbox_style="open-street-map",
+        # projection="mercator", 
         range_color=[0,100],
         hover_name="cca_name",
         hover_data=[race2],
@@ -134,13 +148,15 @@ def update_graph(race, race2):
         # width=400,
         # height=800
         )
-
-    fig.update_geos(fitbounds='locations', visible=False)
+    
+    fig.update_geos(fitbounds='locations', visible=False#,
+    #   center=dict(lon=41.8, lat=-87.75)
+      )
     # fig.update_traces(hoverinfo='location+cca_name')
     
     # fig.update_layout(
-    #     margin=dict(l=20, r=20, t=20, b=20),
-    #     paper_bgcolor="LightSteelBlue"
+    #     margin=dict(l=40, r=40, t=40, b=40)#,
+    #     # paper_bgcolor="LightSteelBlue"
     #     )
 
     fig2.update_geos(fitbounds='locations', visible=False)
