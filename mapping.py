@@ -40,6 +40,14 @@ service_311_bar = pd.read_csv("data/311_census_bar.csv")
 # Set up dictionaries for filtering data
 _, comm_area_dict = create_dictionaries()
 
+neighborhoods = []
+for neighbordhood in comm_area_dict.values():
+    neighborhoods.append(neighbordhood)
+
+neighbordhoods = sorted(neighborhoods)
+
+neighborhood_to_cca_num = {v: k for k,v in comm_area_dict.items()}
+
 # Set up dictionaries for filtering data
 race_cols = ["White", "Black_or_African_American",
              "American_Indian_or_Alaska_Native", "Asian",
@@ -154,6 +162,9 @@ dropdown_style_d = {'display': 'inline-block',
 top_row_content = [
     # Demo map
     dbc.Col([
+        html.Br(),
+        dbc.Row(html.H3("Filter: Census Demographics"),style={'text-align': 'center'},justify='center'),
+        html.Br(),
         dbc.Row(
             dcc.Dropdown(id="primary_filter",
                          options =[
@@ -162,7 +173,7 @@ top_row_content = [
                             {"label": "Percent unemployed", "value": "Unemployment"}],
                          multi = False,
                          value = "Race",
-                         style = dropdown_style_d
+                         style = dropdown_style_d,
                         ),
                 justify='center'
                 ),
@@ -189,6 +200,9 @@ top_row_content = [
         ]),
     # 311 data map
     dbc.Col([
+        html.Br(),
+        dbc.Row(html.H3("Filter: 311 Service Request Types"),style={'text-align': 'center'},justify='center'),
+        html.Br(),
         dbc.Row(
             dcc.Dropdown(id="select_race2",
                         options =[ {'label': k, 'value': v} for k, v in race_label_to_value.items()],
@@ -219,38 +233,36 @@ top_row_content = [
                 justify='center'
                 ),
         dbc.Row(
-            dcc.Graph(id='demo_map2', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
+            dcc.Graph(id='demo_map2', figure={'layout': {'paper_bgcolor': "#0f2537",
+                                                        'plot_bgcolor': "#0f2537"}}, 
+                       style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
             justify='center'
         )
         ])
     ]
 
-bottom_row_content = [
-    dbc.Col([
-        # For bar graph
-
-        dbc.Row(
-                dcc.Dropdown(id="bar_cca",
-                            options =[ {'label': v, 'value': k} for k, v in comm_area_dict.items()],
-                            multi = False,
-                            value = 41,
-                            style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
-                            ),
-                            justify='center'
+middle_row_content = [
+    # For bar graph
+    html.Br(),
+    dbc.Row(html.H3("Filter: Neighborhood for Resolution Times of 311 Requests"),style={'text-align': 'center'},justify='center'),
+    html.Br(),
+    dbc.Row(
+            dcc.Dropdown(id="bar_cca",
+                        options =[ {'label': hood, 'value': neighborhood_to_cca_num[hood]} for hood in neighbordhoods],
+                        multi = False,
+                        value = 41,
+                        style = dropdown_style_d
+                        ),
+                        justify='center'
             ),
-        dbc.Row(
-                dcc.Graph(id='bar_graph', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
-                justify='center'
-                )
-    ]),
-    dbc.Col([
-
-        dbc.Row(html.Br()),
-        dbc.Row(html.Br())
-    ])
+    dbc.Row(
+            dcc.Graph(id='bar_graph', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
+            justify='center'
+            ),
     ]
 
 app.layout = dbc.Container([
+    html.Br(),
     dbc.Row(
         html.H1("How Neighborhood Demographics Impact 311 Responsiveness",
                 style={'text-align': 'center',
@@ -261,7 +273,8 @@ app.layout = dbc.Container([
 
     dbc.Row(top_row_content),
     dbc.Row(html.Br()),
-    dbc.Row(bottom_row_content)
+    dbc.Row(middle_row_content),
+    dbc.Row("Sources: Chicago 311 Service Request Data (Chicago Data Portal) & American Community Survey (2019)")
     
     ]
     ,fluid=True, style={'backgroundColor':'#0f2537'}
@@ -374,24 +387,13 @@ def update_graph(overall_filter, demo, secondary_demo, race2):
         opacity=0.8,
         featureidkey="properties.area_numbe",
         mapbox_style="open-street-map",
-        # projection="mercator",
         hover_name="cca_name",
         hover_data={output_hover_data: ':.2f'},
         range_color=range_lst,
         title=f"% {title_label} by Chicago Neighobrhood"
-        # width=400,
-        # height=800
         )
     fig.update_geos(fitbounds='locations', visible=False)
     fig.update_layout(paper_bgcolor="#0f2537", font_color = '#fff')
-    fig.add_annotation(
-        showarrow=False,
-        text = "Source: 2019 American Community Survey",
-        valign="top",
-        x = 0,
-        y = -.05,
-        font_color = '#fff'
-    )
 
     fig2 = px.choropleth_mapbox(
         data_frame=census_data,
@@ -404,22 +406,13 @@ def update_graph(overall_filter, demo, secondary_demo, race2):
         opacity=0.8,
         featureidkey="properties.area_numbe",
         mapbox_style="open-street-map",
-        # projection="mercator", 
         range_color=[0,100],
         hover_name="cca_name",
         hover_data=[race2],
         title=f"% {race2} by Chicago Neighborhood (Chicago 311 Requests)"
-        # width=400,
-        # height=800
         )
     fig2.update_geos(fitbounds='locations', visible=False)
-    fig2.add_annotation(
-        showarrow=False,
-        text = "Source: Chicago Data Portal 311 Request Data",
-        valign="top",
-        x = 0,
-        y = -.05
-    )    
+    fig2.update_layout(paper_bgcolor="#0f2537", font_color = '#fff')  
 
     return fig, fig2
 
@@ -445,18 +438,14 @@ def update_bar(neighborhood):
     bar = px.bar(
         data_frame=data_melt,
         x = 'Variable',
-        y = 'value',
-        # facet_col='year', 
-        barmode='group', #Which one to use?
+        y = 'value', 
+        barmode='group',
         color='year',
-        color_discrete_sequence=[px.colors.qualitative.Safe[0], px.colors.qualitative.Prism[1], px.colors.qualitative.Safe[4]],
+        color_discrete_sequence=[px.colors.qualitative.Safe[0], px.colors.qualitative.Vivid[7], "#00558c"],
         title=f"311 Request Response Time in {title_label}",
         labels={    "Variable": "Responsiveness Time",
                     "value": "% Requests Completed",
                     "year": "Year"},
-        # hover_name="cca_name",
-        # hover_data={output_hover_data: ':.2f'},
-        # range_color=range_lst,
         
         width=800,
         height=600
@@ -469,13 +458,7 @@ def update_bar(neighborhood):
     bar.update_yaxes(
         ticksuffix = "%"
         )
-    # bar.add_annotation(
-    #     showarrow=False,
-    #     text = "Source: Chicago 311 Service Request Data (Chicago Data Portal)",
-    #     valign="bottom",
-    #     x = 0,
-    #     y = -.05
-    # )
+    bar.update_layout(paper_bgcolor="#0f2537", plot_bgcolor="#0f2537", font_color = '#fff')
 
     return bar
 
