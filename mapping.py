@@ -7,6 +7,8 @@ A file to create our website in plotly
 # fix hover labels (need to add a percentage sign somehow?)
 # replicate with scatterplot and bar plot (on the bottom)
 # Style drop downs and titles nicer
+# Get clone venv stuff check Lamont later this week
+# Import smaller modules to get component (Dash documentation models)
 
 # LINKS
 # https://plotly.com/python/setting-graph-size/
