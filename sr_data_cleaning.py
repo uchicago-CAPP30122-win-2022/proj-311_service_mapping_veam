@@ -1,12 +1,10 @@
 from sr_data_collector import retrieve_data
 from scraping.create_cca_tract_dict import create_dictionaries
-
-
+import pandas as pd
+import numpy as np
 
 _, comm_area_dict = create_dictionaries()
 df = retrieve_data()
-df_added_cols = create_derived_cols(df)
-df_viz_4 = create_agg_chart_df(df_added_cols)
 
 def create_derived_cols(df):
     # resol_time
@@ -24,7 +22,7 @@ def create_derived_cols(df):
     # time_open_1_hr_12_hr
     df['time_open_1_hr_12_hr'] = np.where((df['diff_mins'] >= 60) & (df['diff_mins'] < 60*12), 1, 0)
     # time_open_12_24_hr
-    df['time_open_12_24_hr'] = np.where((df['diff_mins'] >= 60*12) & (df['diff_mins'] < 60*24), 1, )
+    df['time_open_12_24_hr'] = np.where((df['diff_mins'] >= 60*12) & (df['diff_mins'] < 60*24), 1, 0)
     # time_open_1_3_day
     df['time_open_1_3_day'] = np.where((df['diff_mins'] >= 60*24*1) & (df['diff_mins'] < 60*24*3), 1, 0)
     # time_open_3_7_day
@@ -62,12 +60,31 @@ def create_agg_chart_df(df):
         perc_resol_unresolved = ("time_open_unresolved", np.mean)
         ).sort_values(by=['community_area',"year"], inplace = False)
 
-    df_viz_4['cca_name'] = df_viz_4['community_area'].map(comm_area_dict)
+    # df_viz_4['cca_name'] = df_viz_4['community_area'].map(comm_area_dict)
     
     return df_viz_4
 
 
+def write_csv(data, filepath):
+    '''
+    Write CSV for file.
+
+    Inputs:
+        # filename (str): the name for the CSV to write
+        data (Pandas dataframe: data to turn into CSV
+        filepath (str): filepath to save CSV to
+
+    Returns:
+        CSV file of dataframe
+    '''
+
+    return data.to_csv(filepath)
+
 
 # visual 2
 def create_agg_map_df():
-    
+    pass
+
+
+df_added_cols = create_derived_cols(df)
+df_viz_4 = create_agg_chart_df(df_added_cols)
