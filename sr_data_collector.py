@@ -4,14 +4,14 @@ import numpy as np
 import datetime
 from datetime import date
 
-# get data from Chicago Data Portal
-socrata_domain = "data.cityofchicago.org"
-socrata_dataset_identifier = "v6vf-nfxy"
-app_token = "6tRoBirkYQMdr8MMFR8FzgBXq"
-api_username = "v4vigtory@gmail.com"
-api_password = "311_TeamVeam"
 
-def retrieve_data(socrata_domain, app_token, api_username, api_password, socrata_dataset_identifier):
+def retrieve_data():
+    # get data from Data Portal
+    socrata_domain = "data.cityofchicago.org"
+    socrata_dataset_identifier = "v6vf-nfxy"
+    app_token = "6tRoBirkYQMdr8MMFR8FzgBXq"
+    api_username = "v4vigtory@gmail.com"
+    api_password = "311_TeamVeam"
     client = Socrata(socrata_domain, app_token, username=api_username, password=api_password)
     # breaking up data collection by year to modularize API pull 
     sr_2021 = client.get(socrata_dataset_identifier,
