@@ -4,7 +4,7 @@ A file to create our website in plotly
 # LIST OF THINGS LATER?
 # connect 311 data to 2nd graph
 # replicate with scatterplot and bar plot (on the bottom)
-# Style drop downs and titles nicer
+# Style title, colorbar, and source in white and make bold for title
 # Get clone venv stuff check Lamont later this week
 # Import smaller modules to get component (Dash documentation models)
 
@@ -121,18 +121,19 @@ third_filter = {'Race': {"N/A": "N/A"},
                             #     "No max": "LTM_income_200k+"},
     'Unemployment': {"N/A": "N/A"}
     } 
-
+dropdown_style_d = {'display': 'inline-block',
+                    'text-align': 'center',
+                    'font-family': 'Helvetica',
+                    'color': '#4c9be8',
+                    'width': '60%'}
 
 # -----------------------------------------------------------
 # App layout
 
-app.layout = dbc.Container([
-    dbc.Row(
-        html.H1("How Neighborhood Demographics Impact 311 Responsiveness", style={'text-align': 'center', 'font-family': 'Helvetica'})
-    ),
-
-    dbc.Row(
-        [
+top_row_content = [
+    # Demo map
+    dbc.Col([
+        dbc.Row(
             dcc.Dropdown(id="primary_filter",
                          options =[
                             {"label": "Race", "value": "Race"},
@@ -140,39 +141,121 @@ app.layout = dbc.Container([
                             {"label": "Percent unemployed", "value": "Unemployment"}],
                          multi = False,
                          value = "Race",
-                         style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
+                         style = dropdown_style_d
                         ),
+                justify='center'
+                ),
+        dbc.Row(
+            dcc.Dropdown(id="secondary_filter",
+                         style = dropdown_style_d
+                        ),
+                justify='center'
+                ),
+        dbc.Row(
+            dcc.Dropdown(id="tertiary_filter",
+                         style = dropdown_style_d,
+                        ),
+                justify='center'
+                ),
+        dbc.Row(
+            dcc.Graph(id='demo_map', figure={'layout': {'paper_bgcolor': "#0f2537",
+                                                        'plot_bgcolor': "#0f2537"}}, 
+                      style = {'display': 'inline-block', 'width': '80vh',
+                               'height': '90vh'},
+                      ),
+            justify='center'
+            )
+        ]),
+    # 311 data map
+    dbc.Col([
+        dbc.Row(
             dcc.Dropdown(id="select_race2",
                         options =[ {'label': k, 'value': v} for k, v in race_label_to_value.items()],
                         multi = False,
                         value = "White",
-                        style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
-                        )
-        ],
-            justify='center'
-        ),
-    dbc.Row(
-    # Graph 1 second-level dropdown
-            dcc.Dropdown(id="secondary_filter",
-                         style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
+                        style = dropdown_style_d
                         ),
-            justify='center'
-        ),
-    dbc.Row(
-    # Graph 1 third-level dropdown
-            dcc.Dropdown(id="tertiary_filter",
-                         style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'},
+                justify='center'
+                ),
+        dbc.Row(
+            dcc.Dropdown(id="secondary_filter2",
+                         style = dropdown_style_d,
+                         multi = False,
+                         options = {"N/A": "N/A"},
+                         value = "N/A",
+                         disabled=True
                         ),
-                        justify='center'
-        ),
-    dbc.Row([
-            dcc.Graph(id='demo_map', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
-            dcc.Graph(id='demo_map2', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'})
-            ],
+                justify='center'
+                ),
+        dbc.Row(
+            dcc.Dropdown(id="tertiary_filter2",
+                         style = dropdown_style_d,
+                         multi = False,
+                         options = {"N/A": "N/A"},
+                         value = "N/A",
+                         disabled=True
+                        ),
+                justify='center'
+                ),
+        dbc.Row(
+            dcc.Graph(id='demo_map2', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
             justify='center'
-            ),
+        )
+        ])
+    ]
 
-    ], fluid=True)
+app.layout = dbc.Container([
+    dbc.Row(
+        html.H1("How Neighborhood Demographics Impact 311 Responsiveness",
+                style={'text-align': 'center',
+                       'font-family': 'Helvetica',
+                       'font-size': '2.5rem',
+                       'font-color': '#fff'})
+    ),
+
+    dbc.Row(top_row_content)
+    #     [
+    #         dcc.Dropdown(id="primary_filter",
+    #                      options =[
+    #                         {"label": "Race", "value": "Race"},
+    #                         {"label": "Range of annual incomes", "value": "Range of annual incomes"},
+    #                         {"label": "Percent unemployed", "value": "Unemployment"}],
+    #                      multi = False,
+    #                      value = "Race",
+    #                      style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
+    #                     ),
+    #         dcc.Dropdown(id="select_race2",
+    #                     options =[ {'label': k, 'value': v} for k, v in race_label_to_value.items()],
+    #                     multi = False,
+    #                     value = "White",
+    #                     style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
+    #                     )
+    #     ],
+    #         justify='center'
+    #     ),
+    # dbc.Row(
+    # # Graph 1 second-level dropdown
+    #         dcc.Dropdown(id="secondary_filter",
+    #                      style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
+    #                     ),
+    #         justify='center'
+    #     ),
+    # dbc.Row(
+    # # Graph 1 third-level dropdown
+    #         dcc.Dropdown(id="tertiary_filter",
+    #                      style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'},
+    #                     ),
+    #                     justify='center'
+    #     ),
+    # dbc.Row([
+    #         dcc.Graph(id='demo_map', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
+    #         dcc.Graph(id='demo_map2', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'})
+    #         ],
+    #         justify='center'
+    #         ),
+
+    # ]
+    ],fluid=True, style={'backgroundColor':'#0f2537'})
 
 # -----------------------------------------------------------
 # Connect the Plotly graphs with Dash Componenets
@@ -290,6 +373,7 @@ def update_graph(overall_filter, demo, secondary_demo, race2):
         # height=800
         )
     fig.update_geos(fitbounds='locations', visible=False)
+    fig.update_layout(paper_bgcolor="#0f2537")
     fig.add_annotation(
         showarrow=False,
         text = "Source: 2019 American Community Survey",
@@ -297,6 +381,7 @@ def update_graph(overall_filter, demo, secondary_demo, race2):
         x = 0,
         y = -.05
     )
+    fig.update_traces(colorbar_tickfont={'color':"#fff"})
 
     fig2 = px.choropleth_mapbox(
         data_frame=census_data,
