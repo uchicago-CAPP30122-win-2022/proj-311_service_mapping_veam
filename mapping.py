@@ -3,8 +3,6 @@ A file to create our website in plotly
 '''
 # LIST OF THINGS LATER?
 # connect 311 data to 2nd graph
-# TBD if we want to change longer race titles (e.g. Native Hawaiian)?
-# fix hover labels (need to add a percentage sign somehow?)
 # replicate with scatterplot and bar plot (on the bottom)
 # Style drop downs and titles nicer
 # Get clone venv stuff check Lamont later this week
@@ -28,7 +26,7 @@ import numpy as np
 # https://plotly.com/python/choropleth-maps/
 # https://www.youtube.com/watch?v=hSPmj7mK6ng&list=TLPQMDIwMzIwMjK-RX-K6Ja5bw&index=5
 
-app = dash.Dash(__name__)
+app = dash.Dash("Final project", external_stylesheets=[dbc.themes.SUPERHERO])
 
 # -----------------------------------------------------------
 # Import and clean data
@@ -150,24 +148,29 @@ app.layout = dbc.Container([
                         value = "White",
                         style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
                         )
-        ]
+        ],
+            justify='center'
         ),
     dbc.Row(
     # Graph 1 second-level dropdown
             dcc.Dropdown(id="secondary_filter",
                          style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
-                        )
+                        ),
+            justify='center'
         ),
     dbc.Row(
     # Graph 1 third-level dropdown
             dcc.Dropdown(id="tertiary_filter",
-                         style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
-                        )
+                         style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'},
+                        ),
+                        justify='center'
         ),
     dbc.Row([
             dcc.Graph(id='demo_map', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
             dcc.Graph(id='demo_map2', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'})
-            ]),
+            ],
+            justify='center'
+            ),
 
     ], fluid=True)
 
@@ -240,24 +243,26 @@ def update_graph(overall_filter, demo, secondary_demo, race2):
     
     # Set up title info and output_col_title
     if overall_filter == 'Race':
-        output_lab = "%" + race_value_to_label[demo]
-        title_label = output_lab.lower()
-        demo_output[output_lab] = demo_output['output_col']
+        title_label = race_value_to_label[demo]
+        output_hover_data = "%" + title_label # Create column name for hover_data
+        demo_output[output_hover_data] = demo_output['output_col']
     elif overall_filter == 'Unemployment':
-        title_label = unemployment_value_to_label[demo].lower()
-        output_lab = '% Unemp.'
-        demo_output[output_lab] = demo_output['output_col']
+        title_label = unemployment_value_to_label[demo]
+        output_hover_data = '% Unemp.' # Create column name for hover_data
+        demo_output[output_hover_data] = demo_output['output_col']
     else:
         min_label = min_income_value_to_label[demo]
         max_label = max_income_value_to_label[secondary_demo]
         if max_label == "No max":
             title_label = "making over " + min_label + " per year"
-            output_lab = '% >' + min_label
-            demo_output[output_lab] = demo_output['output_col']
+            output_hover_data = '% >' + min_label # Create column name for hover_data
+            demo_output[output_hover_data] = demo_output['output_col']
         else:
             title_label = "making between " + min_label + " - " + max_label + " per year"
-            output_lab = "% b/t " + min_label + " - " + max_label
-            demo_output[output_lab] = demo_output['output_col']
+            output_hover_data = "% b/t " + min_label + " - " + max_label # Create column name for hover_data
+            demo_output[output_hover_data] = demo_output['output_col']
+    # Set the actual reference column
+    demo_output['%'] = demo_output[output_hover_data]
     
     # Set zoom bounds
     if overall_filter == 'Unemployment':
@@ -268,7 +273,7 @@ def update_graph(overall_filter, demo, secondary_demo, race2):
     fig = px.choropleth_mapbox(
         data_frame=demo_output,
         geojson=geojson,
-        color=output_lab,
+        color='%',
         color_continuous_scale='blues',
         locations="cca_num",
         zoom=9, 
@@ -278,12 +283,20 @@ def update_graph(overall_filter, demo, secondary_demo, race2):
         mapbox_style="open-street-map",
         # projection="mercator",
         hover_name="cca_name",
-        hover_data={output_lab: ':.2f'},
+        hover_data={output_hover_data: ':.2f'},
         range_color=range_lst,
-        title=f"% {title_label} by Chicago Neighobrhood (ACS 2019)"
+        title=f"% {title_label} by Chicago Neighobrhood"
         # width=400,
         # height=800
         )
+    fig.update_geos(fitbounds='locations', visible=False)
+    fig.add_annotation(
+        showarrow=False,
+        text = "Source: 2019 American Community Survey",
+        valign="top",
+        x = 0,
+        y = -.05
+    )
 
     fig2 = px.choropleth_mapbox(
         data_frame=census_data,
@@ -304,18 +317,14 @@ def update_graph(overall_filter, demo, secondary_demo, race2):
         # width=400,
         # height=800
         )
-    
-    fig.update_geos(fitbounds='locations', visible=False#,
-    #   center=dict(lon=41.8, lat=-87.75)
-      )
-    # fig.update_traces(hoverinfo='location+cca_name')
-    
-    # fig.update_layout(
-    #     margin=dict(l=40, r=40, t=40, b=40)#,
-    #     # paper_bgcolor="LightSteelBlue"
-    #     )
-
     fig2.update_geos(fitbounds='locations', visible=False)
+    fig2.add_annotation(
+        showarrow=False,
+        text = "Source: Chicago Data Portal 311 Request Data",
+        valign="top",
+        x = 0,
+        y = -.05
+    )    
 
     return fig, fig2
 
