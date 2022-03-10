@@ -214,47 +214,6 @@ app.layout = dbc.Container([
     ),
 
     dbc.Row(top_row_content)
-    #     [
-    #         dcc.Dropdown(id="primary_filter",
-    #                      options =[
-    #                         {"label": "Race", "value": "Race"},
-    #                         {"label": "Range of annual incomes", "value": "Range of annual incomes"},
-    #                         {"label": "Percent unemployed", "value": "Unemployment"}],
-    #                      multi = False,
-    #                      value = "Race",
-    #                      style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
-    #                     ),
-    #         dcc.Dropdown(id="select_race2",
-    #                     options =[ {'label': k, 'value': v} for k, v in race_label_to_value.items()],
-    #                     multi = False,
-    #                     value = "White",
-    #                     style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
-    #                     )
-    #     ],
-    #         justify='center'
-    #     ),
-    # dbc.Row(
-    # # Graph 1 second-level dropdown
-    #         dcc.Dropdown(id="secondary_filter",
-    #                      style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'}
-    #                     ),
-    #         justify='center'
-    #     ),
-    # dbc.Row(
-    # # Graph 1 third-level dropdown
-    #         dcc.Dropdown(id="tertiary_filter",
-    #                      style = {'width': '40%', 'display': 'inline-block', 'text-align': 'center', 'font-family': 'Helvetica'},
-    #                     ),
-    #                     justify='center'
-    #     ),
-    # dbc.Row([
-    #         dcc.Graph(id='demo_map', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
-    #         dcc.Graph(id='demo_map2', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'})
-    #         ],
-    #         justify='center'
-    #         ),
-
-    # ]
     ],fluid=True, style={'backgroundColor':'#0f2537'})
 
 # -----------------------------------------------------------
@@ -373,15 +332,15 @@ def update_graph(overall_filter, demo, secondary_demo, race2):
         # height=800
         )
     fig.update_geos(fitbounds='locations', visible=False)
-    fig.update_layout(paper_bgcolor="#0f2537")
+    fig.update_layout(paper_bgcolor="#0f2537", font_color = '#fff')
     fig.add_annotation(
         showarrow=False,
         text = "Source: 2019 American Community Survey",
         valign="top",
         x = 0,
-        y = -.05
+        y = -.05,
+        font_color = '#fff'
     )
-    fig.update_traces(colorbar_tickfont={'color':"#fff"})
 
     fig2 = px.choropleth_mapbox(
         data_frame=census_data,
