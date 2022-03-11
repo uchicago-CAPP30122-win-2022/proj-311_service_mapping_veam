@@ -24,7 +24,7 @@ def create_derived_cols(df):
     # time_open_1_hr_12_hr
     df['time_open_1_hr_12_hr'] = np.where((df['diff_mins'] >= 60) & (df['diff_mins'] < 60*12), 1, 0)
     # time_open_12_24_hr
-    df['time_open_12_24_hr'] = np.where((df['diff_mins'] >= 60*12) & (df['diff_mins'] < 60*24), 1, )
+    df['time_open_12_24_hr'] = np.where((df['diff_mins'] >= 60*12) & (df['diff_mins'] < 60*24), 1, 0)
     # time_open_1_3_day
     df['time_open_1_3_day'] = np.where((df['diff_mins'] >= 60*24*1) & (df['diff_mins'] < 60*24*3), 1, 0)
     # time_open_3_7_day
