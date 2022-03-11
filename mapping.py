@@ -434,7 +434,7 @@ def update_census_map(overall_filter, demo, secondary_demo):
         hover_name="cca_name",
         hover_data={output_hover_data: ':.2f'},
         range_color=range_lst,
-        title=f"% {title_label} by Chicago Neighobrhood"
+        title=f"% {title_label} by Chicago Neighborhood"
         )
     fig.update_geos(fitbounds='locations', visible=False)
     fig.update_layout(paper_bgcolor="#0f2537", font_color = '#fff')
