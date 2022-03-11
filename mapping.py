@@ -4,9 +4,19 @@ A file to create our website in plotly
 # LIST OF THINGS LATER?
 # connect 311 data to 2nd graph
 # replicate with scatterplot and bar plot (on the bottom)
-# Style title, colorbar, and source in white and make bold for title
 # Get clone venv stuff check Lamont later this week
 # Import smaller modules to get component (Dash documentation models)
+# First map tooltip: remove cca_num and one of the %'s
+# Dynamic range for y-axes first map - just for income
+
+# ---- TO DO: BAR GRAPH 2
+# need to fix # requests per 1k -- currently is not per 1k
+# convert into days
+# hover labels/tips
+# height of both bar graphs
+# resize graphs (primary should be bigger)
+# second bar graph title cuts off if too long
+# Need overall chicago stats
 
 # LINKS
 # https://plotly.com/python/setting-graph-size/
@@ -150,6 +160,12 @@ dict_responsetime = {
     "perc_resol_unresolved": "% Left Unresolved"
     }
 
+dict_311_stat = {
+    "total_reqs": "Number of Requests (per 1000 people)",
+    "avg_resol_time": "Avg. Resolution Time (days)",
+    "median_resol_time": "Median Resolution Time (days)"
+    }
+
 dropdown_style_d = {'display': 'inline-block',
                     'text-align': 'center',
                     'font-family': 'Helvetica',
@@ -253,10 +269,36 @@ middle_row_content = [
                         ),
                         justify='center'
             ),
-    dbc.Row(
-            dcc.Graph(id='bar_graph', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
-            justify='center'
+    dbc.Row(html.Br()),
+
+    dbc.Col([
+        dbc.Row(html.Br()),
+        dbc.Row(html.Br()),
+        dbc.Row(
+                dcc.Graph(id='bar_graph', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
+                justify='center'
+                )
+        ]),
+
+    # Neighborhood bar graph
+    dbc.Col([
+        dbc.Row(
+            dcc.Dropdown(id="bar2_311",
+                        options =[{'label': v, 'value':k} for k, v in dict_311_stat.items()],
+                        multi = False,
+                        value = 'avg_resol_time',
+                        style = dropdown_style_d
+                        ),
+                        justify='center'
             ),
+        dbc.Row(
+            dcc.Graph(id='bar2_graph', figure={'layout': {'paper_bgcolor': "#0f2537",
+                                                        'plot_bgcolor': "#0f2537"}}, 
+                       style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
+            justify='center'
+            )
+        ])
+
     ]
 
 app.layout = dbc.Container([
@@ -272,8 +314,8 @@ app.layout = dbc.Container([
     dbc.Row([dbc.Col(demo_map), dbc.Col(resolution_times_graph)]),
     dbc.Row(html.Br()),
     dbc.Row(middle_row_content),
-    dbc.Row("Sources: Chicago 311 Service Request Data (Chicago Data Portal) & American Community Survey (2019)")
-    
+    dbc.Row("Sources: Chicago 311 Service Request Data (Chicago Data Portal) & American Community Survey (2019)"),
+    dbc.Row(html.Br())
     ]
     ,fluid=True, style={'backgroundColor':'#0f2537'}
     )
@@ -430,24 +472,42 @@ def update_census_map(race2):
 
     return fig
 
+
 # Make bar graph
 @app.callback(
-    Output(component_id = 'bar_graph', component_property='figure'),
-    [Input(component_id = 'bar_cca', component_property='value')]
+    [Output(component_id = 'bar_graph', component_property='figure'),
+    Output(component_id = 'bar2_graph', component_property='figure')],
+    [Input(component_id = 'bar_cca', component_property='value'),
+    Input(component_id = 'bar2_311', component_property='value')]
     )
 
-def update_bar(neighborhood):
+def update_bar(neighborhood, statistic_311):
+    '''
+    '''
+
+    #Find overall Chicago 311 statistics
+    # fill this in here
 
     bar_data_filter = service_311_bar[(service_311_bar['community_area'] == neighborhood)]
     bar_data_filter = bar_data_filter.set_index('year').T.rename_axis('Variable').reset_index()
-    drop = ['community_area', 'total_reqs', 'avg_resol_time', 'median_resol_time']
-    bar_data_filter = bar_data_filter[~bar_data_filter['Variable'].isin(drop)]
-    
-    data_melt = pd.melt(bar_data_filter, id_vars=['Variable'], var_name='year', value_name='value')
+
+    # Filter data for main bar graph
+    drop1 = ['community_area', 'total_reqs', 'avg_resol_time', 'median_resol_time']
+    data_melt = bar_data_filter[~bar_data_filter['Variable'].isin(drop1)]
+    data_melt = pd.melt(data_melt, id_vars=['Variable'], var_name='year', value_name='value')
     data_melt['value'] = round(data_melt['value'] * 100, 2)
 
-    title_label = comm_area_dict[neighborhood]
+    # Filter data for secondary bar graph
+    drop2 = [key for key in dict_responsetime.keys()]
+    drop2.extend([d for d in drop1 if d != statistic_311])
+    data2_melt = bar_data_filter[~bar_data_filter['Variable'].isin(drop2)]
+    data2_melt = pd.melt(data2_melt, id_vars=['Variable'], var_name='year', value_name='value')
 
+    title1_label = comm_area_dict[neighborhood]
+    title2_label = dict_311_stat[statistic_311]
+
+
+    # Bar Graph 1: Primary
     bar = px.bar(
         data_frame=data_melt,
         x = 'Variable',
@@ -455,7 +515,7 @@ def update_bar(neighborhood):
         barmode='group',
         color='year',
         color_discrete_sequence=[px.colors.qualitative.Safe[0], px.colors.qualitative.Vivid[7], "#00558c"],
-        title=f"311 Request Response Time in {title_label}",
+        title=f"311 Request Response Time in {title1_label}",
         labels={    "Variable": "Responsiveness Time",
                     "value": "% Requests Completed",
                     "year": "Year"},
@@ -473,7 +533,27 @@ def update_bar(neighborhood):
         )
     bar.update_layout(paper_bgcolor="#0f2537", plot_bgcolor="#0f2537", font_color = '#fff')
 
-    return bar
+    # Bar Graph 2: Secondary (Neighborhood Specific)
+    bar2 = px.bar(
+        data_frame=data2_melt,
+        x = 'Variable',
+        y = 'value', 
+        barmode='group',
+        color='year',
+        color_discrete_sequence=[px.colors.qualitative.Safe[0], px.colors.qualitative.Vivid[7], "#00558c"],
+        title=f"311 Request Statistics: {title2_label} for {title1_label}",
+        labels={    "Variable": f"{title1_label}",
+                    "value": title2_label,
+                    "year": "Year"},
+        width=800,
+        height=600
+        )
+    bar2.update_xaxes(
+        showticklabels=False
+        )
+    bar2.update_layout(paper_bgcolor="#0f2537", plot_bgcolor="#0f2537", font_color = '#fff')
+
+    return bar, bar2
 
 
 if __name__ == '__main__':
