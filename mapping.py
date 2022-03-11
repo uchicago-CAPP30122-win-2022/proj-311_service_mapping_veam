@@ -8,6 +8,10 @@ A file to create our website in plotly
 # Import smaller modules to get component (Dash documentation models)
 # First map tooltip: remove cca_num and one of the %'s
 # Dynamic range for y-axes first map - just for income
+# Clean up data folder / folders / modularize
+# set up virtual environment
+# make writeup
+# Switch size/formatting of dropdown labels vs. graph titles
 
 # ---- TO DO: BAR GRAPH 2
 # need to fix # requests per 1k -- currently is not per 1k
@@ -17,6 +21,16 @@ A file to create our website in plotly
 # resize graphs (primary should be bigger)
 # second bar graph title cuts off if too long
 # Need overall chicago stats
+
+# ---- TO DO: SCATTERPLOT
+# fix whitespace (probably in middle row content)
+# Add labels to dropdowns
+# convert minutes to days (median, avg. resolution time)
+# fix y axes scales
+# add income?
+# Fix hover lables/tips
+# Add r (correlation coefficient)
+
 
 # LINKS
 # https://plotly.com/python/setting-graph-size/
@@ -45,6 +59,7 @@ census_data = pd.read_csv("data/census_demos.csv")
 census_data["cca_num"] = census_data["cca_num"].astype(str)
 geojson = gpd.read_file("data/community_areas.geojson")
 service_311_bar = pd.read_csv("data/311_census_bar.csv")
+df_311_census = pd.read_csv("data/sr_census_df.csv")
 
 # -----------------------------------------------------------
 # Set up dictionaries for filtering data
@@ -145,6 +160,7 @@ third_filter = {'Race': {"--": "--"},
     'Unemployment': {"--": "--"}
     } 
 
+# For bar plots
 dict_responsetime = {
     "perc_resol_less_than_1": "% Resolved in < 1 min",
     "perc_resol_1_min_1_hr": "% Resolved in 1 min - < 1 hr",
@@ -165,6 +181,26 @@ dict_311_stat = {
     "avg_resol_time": "Avg. Resolution Time (days)",
     "median_resol_time": "Median Resolution Time (days)"
     }
+
+# For scatter plot
+dict_scatter_y = {
+    "sr_per_1000": "Num. Service Requests per 1000 people",
+    "avg_resol_time": "Avg. Resolution Time (days)",
+    "median_resol_time": "Median Resolution Time (days)",
+    "perc_resol_unresolved": "Percent Left Unresolved",
+    'Abandoned Vehicle Complaint': 'Abandoned Vehicle Complaint',
+    'Garbage Cart Maintenance': 'Garbage Cart Maintenance', 
+    'Graffiti Removal Request': 'Graffiti Removal Request',
+    'Pothole in Street Complaint': 'Pothole in Street Complaint',
+    'Rodent Baiting/Rat Complaint': 'Rodent Baiting/Rat Complaint',
+    'Street Light Out Complaint': 'Street Light Out Complaint',
+    'Tree Trim Request': 'Tree Trim Request',
+    'Weed Removal Request': 'Weed Removal Request'
+    }
+
+dict_scatter_x = race_value_to_label
+dict_scatter_x["percent_unemployed"] = "Unemployed"
+
 
 dropdown_style_d = {'display': 'inline-block',
                     'text-align': 'center',
@@ -255,11 +291,12 @@ resolution_times_graph = [
         )
     ]
 
+# Middle row - bar graphs
 middle_row_content = [
     # For bar graph
-    html.Br(),
+    dbc.Row(html.Br()),
     dbc.Row(html.H3("Filter: Neighborhood for Resolution Times of 311 Requests"),style={'text-align': 'center'},justify='center'),
-    html.Br(),
+    dbc.Row(html.Br()),
     dbc.Row(
             dcc.Dropdown(id="bar_cca",
                         options =[ {'label': hood, 'value': neighborhood_to_cca_num[hood]} for hood in neighbordhoods],
@@ -301,6 +338,44 @@ middle_row_content = [
 
     ]
 
+
+dropdown_style_s = dropdown_style_d.copy()
+dropdown_style_s['width'] = '50%'
+
+# Bottom row - scatterplot
+bottom_row_content = [
+    dbc.Row(html.Br()),
+    dbc.Row(html.H3("Filter: Plotting Census Demographics on 311 Service Request Data"),style={'text-align': 'center'},justify='center'),
+    dbc.Row(html.Br()),
+
+    dbc.Row([
+        # Col: Insert Dropdown 1
+        dcc.Dropdown(id="scatter_y",
+            options =[ {'label': v, 'value': k} for k, v in dict_scatter_y.items()],
+            multi = False,
+            value = "sr_per_1000",
+            style = dropdown_style_s
+            ),
+
+        # Col: Insert Dropdown 2
+        dcc.Dropdown(id="scatter_x",
+            options =[ {'label': v, 'value': k} for k, v in dict_scatter_x.items()],
+            multi = False,
+            value = "Black_or_African_American",
+            style = dropdown_style_s
+            )
+        ], justify='center'),
+
+    dbc.Row(
+        # Insert scatterplot map
+        dcc.Graph(id='scatter', figure={'layout': {'paper_bgcolor': "#0f2537",
+                                            'plot_bgcolor': "#0f2537"}}, 
+            style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
+            justify='center'
+        ),
+    dbc.Row(html.Br())
+    ]
+
 app.layout = dbc.Container([
     html.Br(),
     dbc.Row(
@@ -312,8 +387,10 @@ app.layout = dbc.Container([
         ),
 
     dbc.Row([dbc.Col(demo_map), dbc.Col(resolution_times_graph)]),
-    dbc.Row(html.Br()),
+    html.Br(),
     dbc.Row(middle_row_content),
+    html.Br(),
+    dbc.Row(bottom_row_content), # HERE: Added 
     dbc.Row("Sources: Chicago 311 Service Request Data (Chicago Data Portal) & American Community Survey (2019)"),
     dbc.Row(html.Br())
     ]
@@ -339,6 +416,7 @@ def set_second_options_and_value(option):
     if option == 'Unemployment':
         disabled = True
     return options, options[0]['value'], disabled
+
 
 # Census demo map: Third filter
 @app.callback(
@@ -440,6 +518,7 @@ def update_census_map(overall_filter, demo, secondary_demo):
     fig.update_layout(paper_bgcolor="#0f2537", font_color = '#fff')
 
     return fig
+
 
 # Update 311 map
 @app.callback(
@@ -554,6 +633,36 @@ def update_bar(neighborhood, statistic_311):
     bar2.update_layout(paper_bgcolor="#0f2537", plot_bgcolor="#0f2537", font_color = '#fff')
 
     return bar, bar2
+
+
+# Make scatterplot
+@app.callback(
+    Output(component_id = 'scatter', component_property='figure'),
+    [Input(component_id = 'scatter_y', component_property='value'),
+    Input(component_id = 'scatter_x', component_property='value')]
+    )
+
+def update_scatter(scatter_y, scatter_x):
+    '''
+    '''
+
+    label_x = dict_scatter_x[scatter_x]
+    label_y = dict_scatter_y[scatter_y]
+
+    fig_scatter = px.scatter(
+        df_311_census,
+        x=scatter_x,
+        y=scatter_y,
+        size='total_num_race_estimates',
+        hover_name='cca_name',
+        title=f"311 Request Statistics: Plotting {label_y} on Percent {label_x}",
+        labels={scatter_x: f"Percent {label_x}",
+                scatter_y: label_y}
+    )
+
+    fig_scatter.update_layout(paper_bgcolor="#0f2537", plot_bgcolor="#0f2537", font_color = '#fff')
+
+    return fig_scatter
 
 
 if __name__ == '__main__':
