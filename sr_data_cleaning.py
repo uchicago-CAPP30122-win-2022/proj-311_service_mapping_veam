@@ -3,10 +3,12 @@ from sr_data_collector import retrieve_data
 import pandas as pd
 import numpy as np
 
-
-df = retrieve_data()
 census_pop_data = pd.read_csv("data/census_demos_pop.csv")
 census_demo_data = pd.read_csv("data/census_demos.csv")
+
+def get_data():
+    df = retrieve_data()
+    return df
 
 def create_derived_cols(df):
     # resol_time
@@ -140,8 +142,8 @@ def create_sr_census_df(df, census_pop_data, census_demo_data):
                    how='left'
                   )
     sr_census_df = sr_census_df.rename(columns={'cca_name_y': "cca_name"})
-    drop_lst = ['cca_num_x', 'cca_name_x','cca_num_y','index_x','level_0_x','index_y','level_0_y','index']
-    sr_census_df = sr_census_df.drop(drop_lst, axis=1)
+    #drop_lst = ['cca_num_x', 'cca_name_x','cca_num_y','index_x','level_0_x','index_y','level_0_y','index']
+    #sr_census_df = sr_census_df.drop(drop_lst, axis=1)
 
     return sr_census_df
 
@@ -179,7 +181,11 @@ def write_csv(data, filepath):
     return data.to_csv(filepath)
 
 
-df_added_cols = create_derived_cols(df)
-df_viz_4 = create_agg_chart_df(df_added_cols)
-sr_census_df = create_sr_census_df(df, census_pop_data, census_demo_data)
-chicago_df = create_static_df(df,census_pop_data)
+# if __name__ == '__main__':
+#     df_added_cols = create_derived_cols(df)
+#     df_viz_4 = create_agg_chart_df(df_added_cols)
+#     write_csv(df_viz_4, 'data/df_viz_4.csv')
+#     #sr_census_df = create_sr_census_df(df, census_pop_data, census_demo_data)
+#     #write_csv(sr_census_df, 'data/sr_census_df.csv')
+#     chicago_df = create_static_df(df,census_pop_data)
+#     write_csv(chicago_df, 'data/chicago_df.csv')
