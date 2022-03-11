@@ -46,7 +46,7 @@ import plotly.express as px
 import pandas as pd
 import geopandas as gpd
 import numpy as np
-from scraping.create_cca_tract_dict import create_dictionaries
+from servicemapping.data_pull.census.create_cca_tract_dict import create_dictionaries
 
 # https://plotly.com/python/choropleth-maps/
 # https://www.youtube.com/watch?v=hSPmj7mK6ng&list=TLPQMDIwMzIwMjK-RX-K6Ja5bw&index=5
