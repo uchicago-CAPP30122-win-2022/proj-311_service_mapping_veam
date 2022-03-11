@@ -1,5 +1,8 @@
+'''
+File to clean 311 Service Request Data to make it available for Dash visualizations
+'''
+
 from sr_data_collector import retrieve_data
-#from scraping.create_cca_tract_dict import create_dictionaries
 import pandas as pd
 import numpy as np
 
