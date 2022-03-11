@@ -114,7 +114,7 @@ second_filter = {
     'Range of annual incomes': min_income_label_to_value,
     'Unemployment': unemployment_label_to_value
     }
-third_filter = {'Race': {"N/A": "N/A"},
+third_filter = {'Race': {"--": "--"},
     # Not in use 'Range of annual incomes': 
                             #    {"$10k": "LTM_income_sub_10k",
                             #     "$15k": "LTM_income_10-15k",
@@ -132,7 +132,7 @@ third_filter = {'Race': {"N/A": "N/A"},
                             #     "$150k": "LTM_income_125_150k",
                             #     "$200k": "LTM_income_150_200k",
                             #     "No max": "LTM_income_200k+"},
-    'Unemployment': {"N/A": "N/A"}
+    'Unemployment': {"--": "--"}
     } 
 
 dict_responsetime = {
@@ -159,9 +159,8 @@ dropdown_style_d = {'display': 'inline-block',
 # -----------------------------------------------------------
 # App layout
 
-top_row_content = [
+demo_map = [
     # Demo map
-    dbc.Col([
         html.Br(),
         dbc.Row(html.H3("Filter: Census Demographics"),style={'text-align': 'center'},justify='center'),
         html.Br(),
@@ -197,9 +196,9 @@ top_row_content = [
                       ),
             justify='center'
             )
-        ]),
+    ]
+resolution_times_graph = [
     # 311 data map
-    dbc.Col([
         html.Br(),
         dbc.Row(html.H3("Filter: 311 Service Request Types"),style={'text-align': 'center'},justify='center'),
         html.Br(),
@@ -216,8 +215,8 @@ top_row_content = [
             dcc.Dropdown(id="secondary_filter2",
                          style = dropdown_style_d,
                          multi = False,
-                         options = {"N/A": "N/A"},
-                         value = "N/A",
+                         options = {"--": "--"},
+                         value = "--",
                          disabled=True
                         ),
                 justify='center'
@@ -226,8 +225,8 @@ top_row_content = [
             dcc.Dropdown(id="tertiary_filter2",
                          style = dropdown_style_d,
                          multi = False,
-                         options = {"N/A": "N/A"},
-                         value = "N/A",
+                         options = {"--": "--"},
+                         value = "--",
                          disabled=True
                         ),
                 justify='center'
@@ -238,7 +237,6 @@ top_row_content = [
                        style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
             justify='center'
         )
-        ])
     ]
 
 middle_row_content = [
@@ -271,7 +269,7 @@ app.layout = dbc.Container([
                        'font-color': '#fff'})
         ),
 
-    dbc.Row(top_row_content),
+    dbc.Row([dbc.Col(demo_map), dbc.Col(resolution_times_graph)]),
     dbc.Row(html.Br()),
     dbc.Row(middle_row_content),
     dbc.Row("Sources: Chicago 311 Service Request Data (Chicago Data Portal) & American Community Survey (2019)")
@@ -282,10 +280,11 @@ app.layout = dbc.Container([
 
 # -----------------------------------------------------------
 # Connect the Plotly graphs with Dash Componenets
-# Map: First and second filter
+# Census demo map: First and second filter
 @app.callback(
     dash.dependencies.Output('secondary_filter', 'options'),
     dash.dependencies.Output('secondary_filter', 'value'),
+    dash.dependencies.Output('secondary_filter', 'disabled'),
     [dash.dependencies.Input('primary_filter', 'value')]
     )
 
@@ -294,12 +293,16 @@ def set_second_options_and_value(option):
     Updates secondary filter options
     '''
     options = [{'label': k, 'value': v} for k,v in second_filter[option].items()]
-    return options, options[0]['value']
+    disabled = False
+    if option == 'Unemployment':
+        disabled = True
+    return options, options[0]['value'], disabled
 
-# Map: Third filter
+# Census demo map: Third filter
 @app.callback(
     dash.dependencies.Output('tertiary_filter', 'options'),
     dash.dependencies.Output('tertiary_filter', 'value'),
+    dash.dependencies.Output('tertiary_filter', 'disabled'),
     [dash.dependencies.Input('secondary_filter', 'value'),
      dash.dependencies.Input('primary_filter', 'value')]
     )
@@ -310,26 +313,25 @@ def set_third_options(option, first_filter):
     '''
     if first_filter != 'Range of annual incomes':
         options =  [{'label': k, 'value': v} for k,v in third_filter[first_filter].items()]
+        disabled = True
     else:
         idx = income_cols.index(option)
         options =  [{'label': l, 'value': v} for l,v in max_income_tuples[idx:]]
-    return options, options[0]['value']
+        disabled = False
+    return options, options[0]['value'], disabled
     
 
-# Make maps
+# Make census demo map
 @app.callback(
-    [Output(component_id = 'demo_map', component_property='figure'),
-    Output(component_id = 'demo_map2', component_property='figure')],
-
+    Output(component_id = 'demo_map', component_property='figure'),
     [Input(component_id = 'primary_filter', component_property='value'),
     Input(component_id = 'secondary_filter', component_property='value'),
-    Input(component_id = 'tertiary_filter', component_property='value'),
-    Input(component_id = 'select_race2', component_property='value')]
+    Input(component_id = 'tertiary_filter', component_property='value')]
     )
 
-def update_graph(overall_filter, demo, secondary_demo, race2):
+def update_census_map(overall_filter, demo, secondary_demo):
     '''
-    Updates graph based on demo selected
+    Updates census graph based on demo selected
     '''
     if overall_filter == 'Race':
         output_col = census_data[demo].copy()
@@ -395,7 +397,19 @@ def update_graph(overall_filter, demo, secondary_demo, race2):
     fig.update_geos(fitbounds='locations', visible=False)
     fig.update_layout(paper_bgcolor="#0f2537", font_color = '#fff')
 
-    fig2 = px.choropleth_mapbox(
+    return fig
+
+# Update 311 map
+@app.callback(
+    Output(component_id = 'demo_map2', component_property='figure'),
+    [Input(component_id = 'select_race2', component_property='value')]
+    )
+
+def update_census_map(race2):
+    '''
+    Updates 311 graph based on demo selected
+    '''
+    fig = px.choropleth_mapbox(
         data_frame=census_data,
         geojson=geojson,
         color=race2,
@@ -411,11 +425,10 @@ def update_graph(overall_filter, demo, secondary_demo, race2):
         hover_data=[race2],
         title=f"% {race2} by Chicago Neighborhood (Chicago 311 Requests)"
         )
-    fig2.update_geos(fitbounds='locations', visible=False)
-    fig2.update_layout(paper_bgcolor="#0f2537", font_color = '#fff')  
+    fig.update_geos(fitbounds='locations', visible=False)
+    fig.update_layout(paper_bgcolor="#0f2537", font_color = '#fff')  
 
-    return fig, fig2
-
+    return fig
 
 # Make bar graph
 @app.callback(
