@@ -6,9 +6,12 @@ Description: Using 311 Service Request information from the Chicago data portal,
 
 ## Instructions to execute project codes
 
-NOTE: All codes to be run from within the `servicemapping` folder
+**NOTE:** All codes to be run from within the `servicemapping/` directory
 
 ### Setting up Virtual Environment and installing required packages
+1. Clone this repo
+2. From within `servicemapping/` run `sh install.sh`
+3. Access virtual environment through `source env/bin/activate`
 
 ### Viewing Dashboard
 1. Run `python3 -m mapping`
