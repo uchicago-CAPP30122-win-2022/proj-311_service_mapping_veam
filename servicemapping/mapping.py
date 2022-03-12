@@ -2,20 +2,20 @@
 A file to create our website in plotly
 '''
 # LIST OF THINGS LATER?
-# connect 311 data to 2nd graph
-# replicate with scatterplot and bar plot (on the bottom)
 # Get clone venv stuff check Lamont later this week
 # Import smaller modules to get component (Dash documentation models)
-# First map tooltip: remove cca_num and one of the %'s
-# Dynamic range for y-axes first map - just for income
 # Clean up data folder / folders / modularize
 # set up virtual environment
 # make writeup
 # Switch size/formatting of dropdown labels vs. graph titles
 
+# ---- TO DO: MAPS
+# Do we want dynamic axis for race or set at 100% always
+
 # ---- TO DO: BAR GRAPH 2
-# need to fix # requests per 1k -- currently is not per 1k
-# convert into days
+# MK question: Can the below two be resolved by using df_311_census?
+#   need to fix # requests per 1k -- currently is not per 1k
+#   convert into days
 # hover labels/tips
 # height of both bar graphs
 # resize graphs (primary should be bigger)
@@ -23,9 +23,10 @@ A file to create our website in plotly
 # Need overall chicago stats
 
 # ---- TO DO: SCATTERPLOT
+# Add in income demos and unemployment demo
 # fix whitespace (probably in middle row content)
 # Add labels to dropdowns
-# convert minutes to days (median, avg. resolution time)
+# convert minutes to days (median, avg. resolution time) --> MK question, why isn't this done given my rounding up top?
 # fix y axes scales
 # add income?
 # Fix hover lables/tips
@@ -60,6 +61,17 @@ census_data["cca_num"] = census_data["cca_num"].astype(str)
 geojson = gpd.read_file("data/community_areas.geojson")
 service_311_bar = pd.read_csv("data/311_census_bar.csv")
 df_311_census = pd.read_csv("data/sr_census_df.csv")
+
+# Round data off
+df_311_census['sr_per_1000'] = df_311_census['sr_per_1000'].round(0)
+df_311_census['avg_resol_time'] = df_311_census['avg_resol_time']/(24*60)
+df_311_census['avg_resol_time'] = df_311_census['avg_resol_time'].round(2)
+df_311_census['median_resol_time'] = df_311_census['median_resol_time']/(24*60)
+df_311_census['median_resol_time'] = df_311_census['median_resol_time'].round(2)
+df_311_census['Top 311 issue'] = df_311_census['top_1']
+df_311_census['2nd issue'] = df_311_census['top_2']
+df_311_census['3rd issue'] = df_311_census['top_3']
+
 
 # -----------------------------------------------------------
 # Set up dictionaries for filtering data
@@ -139,26 +151,13 @@ second_filter = {
     'Range of annual incomes': min_income_label_to_value,
     'Unemployment': unemployment_label_to_value
     }
-third_filter = {'Race': {"--": "--"},
-    # Not in use 'Range of annual incomes': 
-                            #    {"$10k": "LTM_income_sub_10k",
-                            #     "$15k": "LTM_income_10-15k",
-                            #     "$20k": "LTM_income_15_20k",
-                            #     "$25k": "LTM_income_20_25k",
-                            #     "$30k": "LTM_income_25_30k",
-                            #     "$35k": "LTM_income_30_35k",
-                            #     "$40k": "LTM_income_35_40k",
-                            #     "$45k": "LTM_income_40_45k",
-                            #     "$50k": "LTM_income_45_50k",
-                            #     "$60k": "LTM_income_50_60k",
-                            #     "$75k": "LTM_income_60_75k",
-                            #     "$100k": "LTM_income_75_100k",
-                            #     "$125k": "LTM_income_100_125k",
-                            #     "$150k": "LTM_income_125_150k",
-                            #     "$200k": "LTM_income_150_200k",
-                            #     "No max": "LTM_income_200k+"},
-    'Unemployment': {"--": "--"}
-    } 
+third_filter = {'Race': {"--": "--"}, 'Unemployment': {"--": "--"}} 
+
+# Second map filter
+map_311_filter = {
+    "sr_per_1000": "Num. Service Requests per 1000 people",
+    "avg_resol_time": "Avg. Resolution Time (days)",
+    "median_resol_time": "Median Resolution Time (days)"}
 
 # For bar plots
 dict_responsetime = {
@@ -255,10 +254,10 @@ resolution_times_graph = [
         dbc.Row(html.H3("Filter: 311 Service Request Types"),style={'text-align': 'center'},justify='center'),
         html.Br(),
         dbc.Row(
-            dcc.Dropdown(id="select_race2",
-                        options =[ {'label': k, 'value': v} for k, v in race_label_to_value.items()],
+            dcc.Dropdown(id="311_map_filter",
+                        options = [{'label': v, 'value':k} for k, v in map_311_filter.items()],
                         multi = False,
-                        value = "White",
+                        value = "sr_per_1000",
                         style = dropdown_style_d
                         ),
                 justify='center'
@@ -284,7 +283,7 @@ resolution_times_graph = [
                 justify='center'
                 ),
         dbc.Row(
-            dcc.Graph(id='demo_map2', figure={'layout': {'paper_bgcolor': "#0f2537",
+            dcc.Graph(id='311_map', figure={'layout': {'paper_bgcolor': "#0f2537",
                                                         'plot_bgcolor': "#0f2537"}}, 
                        style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
             justify='center'
@@ -472,7 +471,7 @@ def update_census_map(overall_filter, demo, secondary_demo):
     # Set up title info and output_col_title
     if overall_filter == 'Race':
         title_label = race_value_to_label[demo]
-        output_hover_data = "%" + title_label # Create column name for hover_data
+        output_hover_data = "% " + title_label # Create column name for hover_data
         demo_output[output_hover_data] = demo_output['output_col']
     elif overall_filter == 'Unemployment':
         title_label = unemployment_value_to_label[demo]
@@ -493,10 +492,15 @@ def update_census_map(overall_filter, demo, secondary_demo):
     demo_output['%'] = demo_output[output_hover_data]
     
     # Set zoom bounds
-    if overall_filter == 'Unemployment':
-        range_lst = [0,50]
+    max_val = demo_output['%'].max()
+    max_val = round(max_val, -1)
+    if overall_filter == 'Race':
+        ranges = [0,100]
+    elif overall_filter == 'Unemployment':
+        ranges = [0,40]
     else:
-        range_lst = [0,100]
+        ranges = [0,max_val]
+        
 
     fig = px.choropleth_mapbox(
         data_frame=demo_output,
@@ -510,8 +514,10 @@ def update_census_map(overall_filter, demo, secondary_demo):
         featureidkey="properties.area_numbe",
         mapbox_style="open-street-map",
         hover_name="cca_name",
-        hover_data={output_hover_data: ':.2f'},
-        range_color=range_lst,
+        hover_data={output_hover_data: ':.2f',
+                    'cca_num': False,
+                    '%': False},
+        range_color=ranges,
         title=f"% {title_label} by Chicago Neighborhood"
         )
     fig.update_geos(fitbounds='locations', visible=False)
@@ -522,29 +528,45 @@ def update_census_map(overall_filter, demo, secondary_demo):
 
 # Update 311 map
 @app.callback(
-    Output(component_id = 'demo_map2', component_property='figure'),
-    [Input(component_id = 'select_race2', component_property='value')]
+    Output(component_id = '311_map', component_property='figure'),
+    [Input(component_id = '311_map_filter', component_property='value')]
     )
 
-def update_census_map(race2):
+def update_311_map(filter_for_311):
     '''
     Updates 311 graph based on demo selected
     '''
+
+    # Set the actual reference column
+    map_output = df_311_census.copy()
+    if filter_for_311 == "sr_per_1000":
+        output_title = 'Req. per 1k'
+    else:
+        output_title = 'Days' 
+    map_output[output_title] = map_output[filter_for_311]
+
+    max_val = map_output[output_title].max()
+    max_val = round(max_val, -1)
+
     fig = px.choropleth_mapbox(
-        data_frame=census_data,
+        data_frame=map_output,
         geojson=geojson,
-        color=race2,
+        color=output_title,
         color_continuous_scale='blues',
-        locations="cca_num",
+        locations="cca_num_x",
         zoom=9, 
         center = {"lat": 41.8, "lon": -87.75},
         opacity=0.8,
         featureidkey="properties.area_numbe",
         mapbox_style="open-street-map",
-        range_color=[0,100],
         hover_name="cca_name",
-        hover_data=[race2],
-        title=f"% {race2} by Chicago Neighborhood (Chicago 311 Requests)"
+        range_color=[0, max_val],
+        hover_data={output_title: True,
+                    'Top 311 issue': True,
+                    '2nd issue': True,
+                    '3rd issue': True,
+                    'cca_num_x': False},
+        title=f"{map_311_filter[filter_for_311]} by Chicago Neighborhood"
         )
     fig.update_geos(fitbounds='locations', visible=False)
     fig.update_layout(paper_bgcolor="#0f2537", font_color = '#fff')  
@@ -655,7 +677,7 @@ def update_scatter(scatter_y, scatter_x):
         y=scatter_y,
         size='total_num_race_estimates',
         hover_name='cca_name',
-        title=f"311 Request Statistics: Plotting {label_y} on Percent {label_x}",
+        title=f"{label_y} vs. Percent {label_x}",
         labels={scatter_x: f"Percent {label_x}",
                 scatter_y: label_y}
     )
@@ -667,5 +689,3 @@ def update_scatter(scatter_y, scatter_x):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-
-
