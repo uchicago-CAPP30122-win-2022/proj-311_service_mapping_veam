@@ -2,7 +2,7 @@
 File to clean 311 Service Request Data to make it available for Dash visualizations
 '''
 
-from sr_data_collector import retrieve_data
+from data_pull.sr311.sr_data_collector import retrieve_data
 import pandas as pd
 import numpy as np
 
@@ -10,10 +10,16 @@ census_pop_data = pd.read_csv("data/census_demos_pop.csv")
 census_demo_data = pd.read_csv("data/census_demos.csv")
 
 def get_data():
+    '''
+    Function that does the API pull from Chicago Data portal
+    '''
     df = retrieve_data()
     return df
 
 def create_derived_cols(df):
+    '''
+    Function to create flags for different buckets of service responsiveness
+    '''
     # resol_time
     df['diff_mins'] = (pd.to_datetime(df['closed_date']) - pd.to_datetime(df['created_date']))/np.timedelta64(1,'m')
 
@@ -49,6 +55,10 @@ def create_derived_cols(df):
 
 # visual 4 (bar graph by year)
 def create_agg_chart_df(df):
+    '''
+    Function to create dataset for Service Responsiveness Bar Chart
+    '''
+    
     df_viz_4 = df.groupby(["community_area","year"]).agg(
         total_reqs = ("sr_number", len),
         avg_resol_time = ("diff_mins", np.mean),
@@ -72,6 +82,9 @@ def create_agg_chart_df(df):
 
 # visual 2 and 3 (map & scatter plot)
 def create_sr_census_df(df, census_pop_data, census_demo_data):
+    '''
+    Function to add merge SR data with census data and create additional metrics
+    '''
     # create top_sr_pivot_final
     # create filtered df for top 8 SR types
     df_filtered = df[df.sr_type.isin(['Graffiti Removal Request','Street Light Out Complaint','Rodent Baiting/Rat Complaint','Pothole in Street Complaint','Garbage Cart Maintenance','Weed Removal Request','Tree Trim Request','Abandoned Vehicle Complaint'])]
@@ -151,6 +164,9 @@ def create_sr_census_df(df, census_pop_data, census_demo_data):
     return sr_census_df
 
 def create_static_df(df,census_pop_data):
+    '''
+    Function to calculate overall metrics for Chicago
+    '''
     chicago = {'City': ["Chicago"]}
     chicago_df = pd.DataFrame(data=chicago)
 
@@ -165,7 +181,6 @@ def create_static_df(df,census_pop_data):
     chicago_df['sr_per_1000'] = chicago_df.total_req / total_pop *1000
 
     return chicago_df
-
 
 
 def write_csv(data, filepath):
@@ -184,11 +199,27 @@ def write_csv(data, filepath):
     return data.to_csv(filepath)
 
 
-# if __name__ == '__main__':
-#     df_added_cols = create_derived_cols(df)
-#     df_viz_4 = create_agg_chart_df(df_added_cols)
-#     write_csv(df_viz_4, 'data/df_viz_4.csv')
-#     #sr_census_df = create_sr_census_df(df, census_pop_data, census_demo_data)
-#     #write_csv(sr_census_df, 'data/sr_census_df.csv')
-#     chicago_df = create_static_df(df,census_pop_data)
-#     write_csv(chicago_df, 'data/chicago_df.csv')
+if __name__ == '__main__':
+    df = get_data()
+
+    print("Preparing data for 311 Responsiveness Bar Chart")
+
+    df_added_cols = create_derived_cols(df)
+    df_viz_4 = create_agg_chart_df(df_added_cols)
+    write_csv(df_viz_4, 'data/311_census_bar.csv')
+
+    print("Data for Bar Chart created as data/311_census_bar.csv")
+
+    print("Combining 311 SR data with Census data for Map and Scatter plot")
+    
+    sr_census_df = create_sr_census_df(df, census_pop_data, census_demo_data)
+    write_csv(sr_census_df, 'data/sr_census_df.csv')
+
+    print("Data for Bar Chart created as data/sr_census_df.csv")
+
+    print("Preparing overall Chicago numbers for comparison")
+    
+    chicago_df = create_static_df(df,census_pop_data)
+    write_csv(chicago_df, 'data/chicago_df.csv')
+
+    print("Data created as data/chicago_df.csv")
