@@ -18,8 +18,8 @@ NOTE: All codes to be run from within the `servicemapping` folder
 
 #### To view sample data API-pull from Chicago City Data portal: 
 1. Run `python3 -m data_pull.sr311.sr_sample_data_collector`
-2. Sample dataset created is stored in `data/sr_sample_raw.csv`
+2. Sample dataset created is stored in `servicemapping/data/sr_sample_raw.csv`
 
 #### To recreate underlying datasets - by re-pulling Service Request data from Chicago City portal: (Run Time: ~5 mins)
 1. Run `python3 -m data_pull.sr311.sr_data_cleaning`
-2. 3 datasets (`311_census_bar.csv`, `sr_census_df` and `chicago_df`) are created and stored in `data/`
+2. 3 datasets (`311_census_bar.csv`, `sr_census_df` and `chicago_df`) are created and stored in `servicemapping/data/`
