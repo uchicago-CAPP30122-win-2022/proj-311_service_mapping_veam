@@ -4,32 +4,26 @@ A file to create our website in plotly
 # LIST OF THINGS LATER?
 # Get clone venv stuff check Lamont later this week
 # Import smaller modules to get component (Dash documentation models)
-# Clean up data folder / folders / modularize
 # set up virtual environment
 # make writeup
 # Switch size/formatting of dropdown labels vs. graph titles
 
 # ---- TO DO: MAPS
 # Do we want dynamic axis for race or set at 100% always
+# Top right - do we want to divide by 3 for service requests to get avg. per year?
 
 # ---- TO DO: BAR GRAPH 2
-# MK question: Can the below two be resolved by using df_311_census?
-#   need to fix # requests per 1k -- currently is not per 1k
-#   convert into days
-# hover labels/tips
+# hover labels/tips - MK took a crack, let me know if you agree / disagree
 # height of both bar graphs
 # resize graphs (primary should be bigger)
-# second bar graph title cuts off if too long
-# Need overall chicago stats
+# Need overall chicago stats -- NEED THESE BY YEAR, JUST HAVE TOTAL
 
 # ---- TO DO: SCATTERPLOT
 # Add in income demos and unemployment demo
 # fix whitespace (probably in middle row content)
 # Add labels to dropdowns
-# convert minutes to days (median, avg. resolution time) --> MK question, why isn't this done given my rounding up top?
 # fix y axes scales
-# add income?
-# Fix hover lables/tips
+# Add a legend showing the bubble size is with population?
 # Add r (correlation coefficient)
 
 
@@ -38,6 +32,7 @@ A file to create our website in plotly
 # https://dash.plotly.com/basic-callbacks
 # https://dash.plotly.com/dash-core-components/dropdown
 
+from asyncore import close_all
 import dash
 from dash import dcc
 from dash import html
@@ -59,15 +54,26 @@ app = dash.Dash("Final project", external_stylesheets=[dbc.themes.SUPERHERO])
 census_data = pd.read_csv("data/census_demos.csv")
 census_data["cca_num"] = census_data["cca_num"].astype(str)
 geojson = gpd.read_file("data/community_areas.geojson")
+
 service_311_bar = pd.read_csv("data/311_census_bar.csv")
 df_311_census = pd.read_csv("data/sr_census_df.csv")
 
+to_use_to_make_per_1k = df_311_census[['cca_num_x', 'total_num_race_estimates']]
+service_311_bar = service_311_bar.merge(to_use_to_make_per_1k,
+                                        left_on="community_area",
+                                        right_on="cca_num_x")
+del service_311_bar["cca_num_x"]
+service_311_bar['sr_per_1000'] = 1000 * (service_311_bar['total_reqs'] /
+                                 service_311_bar['total_num_race_estimates'])
+
 # Round data off
-df_311_census['sr_per_1000'] = df_311_census['sr_per_1000'].round(0)
-df_311_census['avg_resol_time'] = df_311_census['avg_resol_time']/(24*60)
-df_311_census['avg_resol_time'] = df_311_census['avg_resol_time'].round(2)
-df_311_census['median_resol_time'] = df_311_census['median_resol_time']/(24*60)
-df_311_census['median_resol_time'] = df_311_census['median_resol_time'].round(2)
+for df in [service_311_bar, df_311_census]:
+    df['avg_resol_time'] = df['avg_resol_time']/(24*60)
+    df['avg_resol_time'] = df['avg_resol_time'].round(2)
+    df['median_resol_time'] = df['median_resol_time']/(24*60)
+    df['median_resol_time'] = df['median_resol_time'].round(2)
+    df['sr_per_1000'] = df['sr_per_1000'].round(0)
+
 df_311_census['Top 311 issue'] = df_311_census['top_1']
 df_311_census['2nd issue'] = df_311_census['top_2']
 df_311_census['3rd issue'] = df_311_census['top_3']
@@ -176,9 +182,9 @@ dict_responsetime = {
     }
 
 dict_311_stat = {
-    "total_reqs": "Number of Requests (per 1000 people)",
-    "avg_resol_time": "Avg. Resolution Time (days)",
-    "median_resol_time": "Median Resolution Time (days)"
+    "sr_per_1000": "Number of 311 Requests (per 1000 people)",
+    "avg_resol_time": "Avg. 311 Request Resolution Time (days)",
+    "median_resol_time": "Median 311 Request Resolution Time (days)"
     }
 
 # For scatter plot
@@ -310,6 +316,7 @@ middle_row_content = [
     dbc.Col([
         dbc.Row(html.Br()),
         dbc.Row(html.Br()),
+        dbc.Row(html.Br()),
         dbc.Row(
                 dcc.Graph(id='bar_graph', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
                 justify='center'
@@ -318,6 +325,7 @@ middle_row_content = [
 
     # Neighborhood bar graph
     dbc.Col([
+        dbc.Row(html.H5("Filter: 311 Requests Summary Statistics"),style={'text-align': 'center'},justify='center'),
         dbc.Row(
             dcc.Dropdown(id="bar2_311",
                         options =[{'label': v, 'value':k} for k, v in dict_311_stat.items()],
@@ -491,7 +499,7 @@ def update_census_map(overall_filter, demo, secondary_demo):
     # Set the actual reference column
     demo_output['%'] = demo_output[output_hover_data]
     
-    # Set zoom bounds
+    # Set color bounds
     max_val = demo_output['%'].max()
     max_val = round(max_val, -1)
     if overall_filter == 'Race':
@@ -593,9 +601,9 @@ def update_bar(neighborhood, statistic_311):
     bar_data_filter = bar_data_filter.set_index('year').T.rename_axis('Variable').reset_index()
 
     # Filter data for main bar graph
-    drop1 = ['community_area', 'total_reqs', 'avg_resol_time', 'median_resol_time']
-    data_melt = bar_data_filter[~bar_data_filter['Variable'].isin(drop1)]
-    data_melt = pd.melt(data_melt, id_vars=['Variable'], var_name='year', value_name='value')
+    drop1 = ['community_area', 'total_reqs', 'avg_resol_time', 'median_resol_time', 'sr_per_1000', 'total_num_race_estimates']
+    pre_melt = bar_data_filter[~bar_data_filter['Variable'].isin(drop1)]
+    data_melt = pd.melt(pre_melt, id_vars=['Variable'], var_name='year', value_name='value')
     data_melt['value'] = round(data_melt['value'] * 100, 2)
 
     # Filter data for secondary bar graph
@@ -604,9 +612,9 @@ def update_bar(neighborhood, statistic_311):
     data2_melt = bar_data_filter[~bar_data_filter['Variable'].isin(drop2)]
     data2_melt = pd.melt(data2_melt, id_vars=['Variable'], var_name='year', value_name='value')
 
+    # Title labels
     title1_label = comm_area_dict[neighborhood]
     title2_label = dict_311_stat[statistic_311]
-
 
     # Bar Graph 1: Primary
     bar = px.bar(
@@ -616,11 +624,13 @@ def update_bar(neighborhood, statistic_311):
         barmode='group',
         color='year',
         color_discrete_sequence=[px.colors.qualitative.Safe[0], px.colors.qualitative.Vivid[7], "#00558c"],
-        title=f"311 Request Response Time in {title1_label}",
+        title=f"{title1_label}: 311 Request Response Time Splits",
         labels={    "Variable": "Responsiveness Time",
                     "value": "% Requests Completed",
                     "year": "Year"},
-        
+        hover_data={'year': True,
+                    'Variable': False,
+                    'value': True},
         width=800,
         height=600
         )
@@ -642,10 +652,13 @@ def update_bar(neighborhood, statistic_311):
         barmode='group',
         color='year',
         color_discrete_sequence=[px.colors.qualitative.Safe[0], px.colors.qualitative.Vivid[7], "#00558c"],
-        title=f"311 Request Statistics: {title2_label} for {title1_label}",
+        title=f"{title1_label}: {title2_label}",
         labels={    "Variable": f"{title1_label}",
                     "value": title2_label,
                     "year": "Year"},
+        hover_data={'year': True,
+                    'Variable': False,
+                    'value': True},
         width=800,
         height=600
         )
@@ -679,7 +692,10 @@ def update_scatter(scatter_y, scatter_x):
         hover_name='cca_name',
         title=f"{label_y} vs. Percent {label_x}",
         labels={scatter_x: f"Percent {label_x}",
-                scatter_y: label_y}
+                scatter_y: label_y},
+        hover_data={scatter_x: ':.2f',
+                    scatter_y: True,
+                    'total_num_race_estimates': False},        
     )
 
     fig_scatter.update_layout(paper_bgcolor="#0f2537", plot_bgcolor="#0f2537", font_color = '#fff')
