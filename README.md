@@ -23,6 +23,10 @@ Description: Using 311 Service Request information from the Chicago data portal,
 1. Run `python3 -m data_pull.sr311.sr_sample_data_collector`
 2. Sample dataset created is stored in `servicemapping/data/sr_sample_raw.csv`
 
+#### To view census data API-pull from American Community Survey:
+1. Run `python3 -m data_pull.census.get_census_data.py`
+2. Sample dataset created is stored in `servicemapping/data/census_demos.csv`
+
 #### To recreate underlying datasets - by re-pulling Service Request data from Chicago City portal: (Run Time: ~5 mins)
 1. Run `python3 -m data_pull.sr311.sr_data_cleaning`
 2. 3 datasets (`311_census_bar.csv`, `sr_census_df` and `chicago_df`) are created and stored in `servicemapping/data/`

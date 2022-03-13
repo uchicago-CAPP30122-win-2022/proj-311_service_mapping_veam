@@ -167,20 +167,18 @@ def create_static_df(df,census_pop_data):
     '''
     Function to calculate overall metrics for Chicago
     '''
-    chicago = {'City': ["Chicago"]}
-    chicago_df = pd.DataFrame(data=chicago)
+    chi_df = df.groupby(["year"]).agg(
+        total_reqs = ("sr_number", len),
+        avg_resol_time = ("diff_mins",np.mean),
+        median_resol_time = ("diff_mins", np.median)
+        ).sort_values(by=['year'], inplace = False)
+    
+    chi_df["sr_per_1000"] = (chi_df.total_reqs / census_pop_data['total_num_race_estimates'].sum() * 1000).round(0)
 
-    total_req = len(df)
-    avg_res_time = df["diff_mins"].mean()
-    median_res_time = df["diff_mins"].median()
-    total_pop = census_pop_data['total_num_race_estimates'].sum()
+    chi_df["avg_resol_time"] = (chi_df["avg_resol_time"]/(24*60)).round(2)
+    chi_df["median_resol_time"] = (chi_df["median_resol_time"]/(24*60)).round(2)
 
-    chicago_df['total_req'] = total_req
-    chicago_df['avg_res_time'] = avg_res_time
-    chicago_df['median_res_time'] = median_res_time
-    chicago_df['sr_per_1000'] = chicago_df.total_req / total_pop *1000
-
-    return chicago_df
+    return chi_df
 
 
 def write_csv(data, filepath):
