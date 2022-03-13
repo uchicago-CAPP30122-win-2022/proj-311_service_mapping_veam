@@ -3,11 +3,8 @@ A file to create our website in plotly
 '''
 # TBUs
 # Get clone venv stuff check Lamont later this week: MAC USERS
-# Need overall chicago stats for bar graph
 # Add a legend showing the bubble size is with population for scatter plot
-# Fix y-axis scale roundup
 # Import smaller modules to get component (Dash documentation models)
-# fix whitespace between rows 2 and 3 (probably in middle row content)
 # Doc strings
 # make writeup
 
@@ -21,6 +18,7 @@ import pandas as pd
 import geopandas as gpd
 import numpy as np
 from data_pull.census.create_cca_tract_dict import create_dictionaries
+import statsmodels
 
 app = dash.Dash("Final project", external_stylesheets=[dbc.themes.SUPERHERO])
 
@@ -32,6 +30,7 @@ geojson = gpd.read_file("data/community_areas.geojson")
 
 service_311_bar = pd.read_csv("data/311_census_bar.csv")
 df_311_census = pd.read_csv("data/sr_census_df.csv")
+chicago_311_avg = pd.read_csv("data/chicago_df.csv")
 
 to_use_to_make_per_1k = df_311_census[['cca_num_x', 'total_num_race_estimates']]
 service_311_bar = service_311_bar.merge(to_use_to_make_per_1k,
@@ -64,7 +63,7 @@ neighborhoods = []
 for neighbordhood in comm_area_dict.values():
     neighborhoods.append(neighbordhood)
 
-neighbordhoods = sorted(neighborhoods)
+neighborhoods = sorted(neighborhoods)
 
 neighborhood_to_cca_num = {v: k for k,v in comm_area_dict.items()}
 
@@ -226,7 +225,7 @@ demo_map = [
             dcc.Graph(id='demo_map', figure={'layout': {'paper_bgcolor': "#0f2537",
                                                         'plot_bgcolor': "#0f2537"}}, 
                       style = {'display': 'inline-block', 'width': '80vh',
-                               'height': '90vh'},
+                               'height': '50vh'},
                       ),
             justify='center'
             )
@@ -235,6 +234,7 @@ resolution_times_graph = [
     # 311 data map
         html.Br(),
         dbc.Row(html.H3("Filter: 311 Service Request Summary Stats"),style={'text-align': 'center'},justify='center'),
+        html.Br(),
         html.Br(),
         dbc.Row(
             dcc.Dropdown(id="311_map_filter",
@@ -250,7 +250,7 @@ resolution_times_graph = [
         dbc.Row(
             dcc.Graph(id='311_map', figure={'layout': {'paper_bgcolor': "#0f2537",
                                                         'plot_bgcolor': "#0f2537"}}, 
-                       style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
+                       style = {'display': 'inline-block', 'width': '80vh', 'height': '50vh'}),
             justify='center'
         )
     ]
@@ -263,7 +263,7 @@ middle_row_content = [
     dbc.Row(html.Br()),
     dbc.Row(
             dcc.Dropdown(id="bar_cca",
-                        options =[ {'label': hood, 'value': neighborhood_to_cca_num[hood]} for hood in neighbordhoods],
+                        options =[ {'label': hood, 'value': neighborhood_to_cca_num[hood]} for hood in neighborhoods],
                         multi = False,
                         value = 41,
                         style = dropdown_style_d
@@ -271,13 +271,12 @@ middle_row_content = [
                         justify='center'
             ),
     dbc.Row(html.Br()),
-
     dbc.Col([
         dbc.Row(html.Br()),
         dbc.Row(html.Br()),
         dbc.Row(html.Br()),
         dbc.Row(
-                dcc.Graph(id='bar_graph', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
+                dcc.Graph(id='bar_graph', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '50vh'}),
                 justify='center'
                 )
         ]),
@@ -297,7 +296,7 @@ middle_row_content = [
         dbc.Row(
             dcc.Graph(id='bar2_graph', figure={'layout': {'paper_bgcolor': "#0f2537",
                                                         'plot_bgcolor': "#0f2537"}}, 
-                       style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
+                       style = {'display': 'inline-block', 'width': '80vh', 'height': '50vh'}),
             justify='center'
             )
         ])
@@ -310,7 +309,8 @@ dropdown_style_s['width'] = '50%'
 
 # Bottom row - scatterplot
 bottom_row_content = [
-    # dbc.Row(html.Br()),
+    dbc.Row(html.Br()),
+    dbc.Row(html.Br()),
     dbc.Row(html.H3("Filter: Plotting Census Demographics on 311 Service Request Data"),style={'text-align': 'center'},justify='center'),
     dbc.Row(html.Br()),
 
@@ -350,7 +350,7 @@ bottom_row_content = [
                     options =[ {'label': v, 'value': k} for k, v in dict_scatter_y.items()],
                     multi = False,
                     value = "sr_per_1000",
-                    style = dropdown_style_s
+                    style = dropdown_style_d
                     ),
                 justify='center')
             ]),
@@ -359,7 +359,7 @@ bottom_row_content = [
         # Insert scatterplot map
         dcc.Graph(id='scatter', figure={'layout': {'paper_bgcolor': "#0f2537",
                                             'plot_bgcolor': "#0f2537"}}, 
-            style = {'display': 'inline-block', 'width': '80vh', 'height': '90vh'}),
+            style = {'display': 'inline-block', 'width': '80vh', 'height': '50vh'}),
             justify='center'
         ),
     dbc.Row(html.Br())
@@ -369,17 +369,12 @@ app.layout = dbc.Container([
     html.Br(),
     dbc.Row(
         html.H1("How Neighborhood Demographics Impact 311 Responsiveness",
-                style={'text-align': 'center',
-                       'font-family': 'Helvetica',
-                       'font-size': '2.5rem',
-                       'font-color': '#fff'})
-        ),
-
+                style={'text-align': 'center'}), justify='center'), 
     dbc.Row([dbc.Col(demo_map), dbc.Col(resolution_times_graph)]),
     html.Br(),
     dbc.Row(middle_row_content),
     html.Br(),
-    dbc.Row(bottom_row_content), # HERE: Added 
+    dbc.Row(bottom_row_content),
     dbc.Row("Sources: Chicago 311 Service Request Data (Chicago Data Portal) & American Community Survey (2019)"),
     dbc.Row(html.Br())
     ]
@@ -483,13 +478,20 @@ def update_census_map(overall_filter, demo, secondary_demo):
     
     # Set color bounds
     max_val = demo_output['%'].max()
-    max_val = round(max_val, -1)
+    if max_val < 1:
+        max_val_denom = .1
+        max_val = max_val_denom * -(-max_val//max_val_denom)
+    else:
+        max_val_str = str(min(99, int(max_val))) # In case we have a 100% cca
+        first_digit = str(int(max_val_str[0]) + 1)
+        num_zero = len(max_val_str) - 1
+        max_val = int(first_digit + num_zero * "0")
+
     if overall_filter == 'Unemployment':
         ranges = [0,40]
     else:
         ranges = [0,max_val]
         
-
     fig = px.choropleth_mapbox(
         data_frame=demo_output,
         geojson=geojson,
@@ -529,17 +531,26 @@ def update_311_map(filter_for_311):
     map_output = df_311_census.copy()
     if filter_for_311 == "sr_per_1000":
         output_title = 'Avg. Annual Req. per 1k'
+        colorbar_title = 'Req./1k'
     else:
         output_title = 'Days' 
-    map_output[output_title] = map_output[filter_for_311]
+        colorbar_title = output_title
 
+    map_output[output_title] = map_output[filter_for_311]
+    map_output[colorbar_title] = map_output[filter_for_311]
+
+    # Set color bounds
     max_val = map_output[output_title].max()
-    max_val = round(max_val, -1)
+    max_str = str(int(max_val))
+    num_zero = len(max_str) - 1
+    first_digit = max_str[0]
+    first_digit = str(int(first_digit) + 1)
+    max_val = int(first_digit + "0" * num_zero)
 
     fig = px.choropleth_mapbox(
         data_frame=map_output,
         geojson=geojson,
-        color=output_title,
+        color=colorbar_title,
         color_continuous_scale='blues',
         locations="cca_num_x",
         zoom=9, 
@@ -575,7 +586,6 @@ def update_bar(neighborhood, statistic_311):
     '''
 
     #Find overall Chicago 311 statistics
-    # fill this in here
 
     bar_data_filter = service_311_bar[(service_311_bar['community_area'] == neighborhood)]
     bar_data_filter = bar_data_filter.set_index('year').T.rename_axis('Variable').reset_index()
@@ -596,6 +606,33 @@ def update_bar(neighborhood, statistic_311):
     title1_label = comm_area_dict[neighborhood]
     title2_label = dict_311_stat[statistic_311]
 
+    # Bring in Chicago info
+    chicago_avgs = chicago_311_avg[['year', statistic_311]].copy()
+    chicago_avgs.columns = ['year', 'value']
+    chicago_avgs['Variable'] = 'Chicago Avg.'
+
+    data2_melt['Variable'] = title1_label
+    data2_melt = pd.concat([data2_melt, chicago_avgs])
+
+    # Set y axis bounds - graph 1
+    max_val = data_melt['value'].max()
+    if max_val < 1:
+        max_val_denom = .1
+        max_val_1 = max_val_denom * -(-max_val//max_val_denom)
+    else:
+        max_val_str = str(min(99, int(max_val))) # In case we have a 100% cca
+        first_digit = str(int(max_val_str[0]) + 1)
+        num_zero = len(max_val_str) - 1
+        max_val_1 = int(first_digit + num_zero * "0")
+
+    # Set y axis bounds - graph 2
+    max_val = data2_melt['value'].max()
+    max_str = str(int(max_val))
+    num_zero = len(max_str) - 1
+    first_digit = max_str[0]
+    first_digit = str(int(first_digit) + 1)
+    max_val_2 = int(first_digit + "0" * num_zero)
+
     # Bar Graph 1: Primary
     bar = px.bar(
         data_frame=data_melt,
@@ -611,8 +648,7 @@ def update_bar(neighborhood, statistic_311):
         hover_data={'year': True,
                     'Variable': False,
                     'value': True},
-        width=800,
-        height=600
+        range_y=[0,max_val_1]
         )
     bar.update_xaxes(
         type='category',
@@ -633,17 +669,14 @@ def update_bar(neighborhood, statistic_311):
         color='year',
         color_discrete_sequence=[px.colors.qualitative.Safe[0], px.colors.qualitative.Vivid[7], "#00558c"],
         title=f"{title1_label}: {title2_label}",
-        labels={    "Variable": f"{title1_label}",
-                    "value": title2_label,
+        labels={    "Variable": f"{title1_label} vs. Chicago Avg.",
+                    "value": 'Variable',
                     "year": "Year"},
         hover_data={'year': True,
                     'Variable': False,
                     'value': True},
-        width=800,
-        height=600
-        )
-    bar2.update_xaxes(
-        showticklabels=False
+        range_y=[0,max_val_2]
+
         )
     bar2.update_layout(paper_bgcolor="#0f2537", plot_bgcolor="#0f2537", font_color = '#fff')
 
@@ -720,7 +753,7 @@ def update_scatter(scatter_y, overall_filter, demo, secondary_demo):
     # Set up data to output
     demo_output = pd.DataFrame()
     demo_output.loc[:,scatter_y] = df_311_census[scatter_y]
-    demo_output.loc[:, 'total_num_race_estimates'] = df_311_census['total_num_race_estimates']
+    demo_output.loc[:, 'Population'] = df_311_census['total_num_race_estimates']
     demo_output.loc[:, 'output_col'] = output_col
     demo_output.loc[:, 'cca_name_x'] = df_311_census['cca_name_x']
 
@@ -744,8 +777,17 @@ def update_scatter(scatter_y, overall_filter, demo, secondary_demo):
             title_label = "making between " + min_label + " - " + max_label + " per year"
             output_hover_data = "% b/t " + min_label + " - " + max_label # Create column name for hover_data
             demo_output[output_hover_data] = demo_output['output_col']
+    
     # Set the actual reference column
     demo_output['%'] = demo_output[output_hover_data]
+
+    # Set y axis bounds
+    max_val = demo_output[scatter_y].max()
+    max_str = str(int(max_val))
+    num_zero = len(max_str) - 1
+    first_digit = max_str[0]
+    first_digit = str(int(first_digit) + 1)
+    max_val = int(first_digit + "0" * num_zero)
 
     label_y = dict_scatter_y[scatter_y]
 
@@ -755,20 +797,24 @@ def update_scatter(scatter_y, overall_filter, demo, secondary_demo):
         demo_output,
         x=output_hover_data,
         y=scatter_y,
-        size='total_num_race_estimates',
+        size='Population',
         hover_name='cca_name_x',
         title=f"{label_y} vs. Percent {title_label}",
         labels={'%': f"Percent {title_label}",
                 scatter_y: label_y},
         hover_data={output_hover_data: ':.2f',
                     scatter_y: True,
-                    'total_num_race_estimates': False},        
+                    'Population': ':,'},  
+        range_y=[0, max_val],
+        trendline='ols',      
     )
     fig_scatter.add_annotation(x=(max(demo_output[output_hover_data])/2), y=max(demo_output[scatter_y]),
             text=f'Correlation Coefficient: {round(corr_coef, 2)}',
             showarrow=False,
             font=dict(size=18))
-    fig_scatter.update_layout(paper_bgcolor="#0f2537", plot_bgcolor="#0f2537", font_color = '#fff')
+    fig_scatter.update_layout(paper_bgcolor="#0f2537", plot_bgcolor="#0f2537",
+                              font_color = '#fff',
+                              showlegend=True, legend_itemsizing="trace")
 
     return fig_scatter
 
