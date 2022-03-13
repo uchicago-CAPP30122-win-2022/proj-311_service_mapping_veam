@@ -1,23 +1,15 @@
 '''
 A file to create our website in plotly
 '''
-# LIST OF THINGS LATER?
-# Get clone venv stuff check Lamont later this week
-# Import smaller modules to get component (Dash documentation models)
-# set up virtual environment
-# make writeup
-# Switch size/formatting of dropdown labels vs. graph titles
-# Doc strings
-# Fix y-axis scale roundup
+# TBUs
+# Get clone venv stuff check Lamont later this week: MAC USERS
 # Need overall chicago stats for bar graph
+# Add a legend showing the bubble size is with population for scatter plot
+# Fix y-axis scale roundup
+# Import smaller modules to get component (Dash documentation models)
 # fix whitespace between rows 2 and 3 (probably in middle row content)
-# Add a legend showing the bubble size is with population for scatter plot?
-
-
-# LINKS
-# https://plotly.com/python/setting-graph-size/
-# https://dash.plotly.com/basic-callbacks
-# https://dash.plotly.com/dash-core-components/dropdown
+# Doc strings
+# make writeup
 
 import dash
 from dash import dcc
@@ -29,9 +21,6 @@ import pandas as pd
 import geopandas as gpd
 import numpy as np
 from data_pull.census.create_cca_tract_dict import create_dictionaries
-
-# https://plotly.com/python/choropleth-maps/
-# https://www.youtube.com/watch?v=hSPmj7mK6ng&list=TLPQMDIwMzIwMjK-RX-K6Ja5bw&index=5
 
 app = dash.Dash("Final project", external_stylesheets=[dbc.themes.SUPERHERO])
 
