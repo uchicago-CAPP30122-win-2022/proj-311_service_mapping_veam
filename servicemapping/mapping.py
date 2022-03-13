@@ -9,11 +9,10 @@ A file to create our website in plotly
 # Switch size/formatting of dropdown labels vs. graph titles
 
 # ---- TO DO: MAPS
-# Do we want dynamic axis for race or set at 100% always
-# Top right - do we want to divide by 3 for service requests to get avg. per year?
+# Fix y-axis scale roundup
 
 # ---- TO DO: BAR GRAPH 2
-# hover labels/tips - MK took a crack, let me know if you agree / disagree
+# Fix y-axis scale roundup
 # height of both bar graphs
 # resize graphs (primary should be bigger)
 # Need overall chicago stats -- NEED THESE BY YEAR, JUST HAVE TOTAL
@@ -77,6 +76,8 @@ for df in [service_311_bar, df_311_census]:
 df_311_census['Top 311 issue'] = df_311_census['top_1']
 df_311_census['2nd issue'] = df_311_census['top_2']
 df_311_census['3rd issue'] = df_311_census['top_3']
+df_311_census['sr_per_1000'] = df_311_census['sr_per_1000'] // 3
+
 
 
 # -----------------------------------------------------------
@@ -161,7 +162,7 @@ third_filter = {'Race': {"--": "--"}, 'Unemployment': {"--": "--"}}
 
 # Second map filter
 map_311_filter = {
-    "sr_per_1000": "Num. Service Requests per 1000 people",
+    "sr_per_1000": "Avg. Annual Num. Service Requests (per 1000 people)",
     "avg_resol_time": "Avg. Resolution Time (days)",
     "median_resol_time": "Median Resolution Time (days)"}
 
@@ -182,14 +183,14 @@ dict_responsetime = {
     }
 
 dict_311_stat = {
-    "sr_per_1000": "Number of 311 Requests (per 1000 people)",
+    "sr_per_1000": "Annual Number of 311 Requests (per 1000 people)",
     "avg_resol_time": "Avg. 311 Request Resolution Time (days)",
     "median_resol_time": "Median 311 Request Resolution Time (days)"
     }
 
 # For scatter plot
 dict_scatter_y = {
-    "sr_per_1000": "Num. Service Requests per 1000 people",
+    "sr_per_1000": "Avg. Annual Num. Service Requests per 1000 people",
     "avg_resol_time": "Avg. Resolution Time (days)",
     "median_resol_time": "Median Resolution Time (days)",
     "perc_resol_unresolved": "Percent Left Unresolved",
@@ -257,7 +258,7 @@ demo_map = [
 resolution_times_graph = [
     # 311 data map
         html.Br(),
-        dbc.Row(html.H3("Filter: 311 Service Request Types"),style={'text-align': 'center'},justify='center'),
+        dbc.Row(html.H3("Filter: 311 Service Request Summary Stats"),style={'text-align': 'center'},justify='center'),
         html.Br(),
         dbc.Row(
             dcc.Dropdown(id="311_map_filter",
@@ -268,26 +269,8 @@ resolution_times_graph = [
                         ),
                 justify='center'
                 ),
-        dbc.Row(
-            dcc.Dropdown(id="secondary_filter2",
-                         style = dropdown_style_d,
-                         multi = False,
-                         options = {"--": "--"},
-                         value = "--",
-                         disabled=True
-                        ),
-                justify='center'
-                ),
-        dbc.Row(
-            dcc.Dropdown(id="tertiary_filter2",
-                         style = dropdown_style_d,
-                         multi = False,
-                         options = {"--": "--"},
-                         value = "--",
-                         disabled=True
-                        ),
-                justify='center'
-                ),
+        dbc.Row(html.Br()),
+        dbc.Row(html.Br()),
         dbc.Row(
             dcc.Graph(id='311_map', figure={'layout': {'paper_bgcolor': "#0f2537",
                                                         'plot_bgcolor': "#0f2537"}}, 
@@ -325,7 +308,7 @@ middle_row_content = [
 
     # Neighborhood bar graph
     dbc.Col([
-        dbc.Row(html.H5("Filter: 311 Requests Summary Statistics"),style={'text-align': 'center'},justify='center'),
+        dbc.Row(html.H5("Filter: 311 Requests Summary Stats"),style={'text-align': 'center'},justify='center'),
         dbc.Row(
             dcc.Dropdown(id="bar2_311",
                         options =[{'label': v, 'value':k} for k, v in dict_311_stat.items()],
@@ -351,7 +334,7 @@ dropdown_style_s['width'] = '50%'
 
 # Bottom row - scatterplot
 bottom_row_content = [
-    dbc.Row(html.Br()),
+    # dbc.Row(html.Br()),
     dbc.Row(html.H3("Filter: Plotting Census Demographics on 311 Service Request Data"),style={'text-align': 'center'},justify='center'),
     dbc.Row(html.Br()),
 
@@ -502,9 +485,7 @@ def update_census_map(overall_filter, demo, secondary_demo):
     # Set color bounds
     max_val = demo_output['%'].max()
     max_val = round(max_val, -1)
-    if overall_filter == 'Race':
-        ranges = [0,100]
-    elif overall_filter == 'Unemployment':
+    if overall_filter == 'Unemployment':
         ranges = [0,40]
     else:
         ranges = [0,max_val]
@@ -548,7 +529,7 @@ def update_311_map(filter_for_311):
     # Set the actual reference column
     map_output = df_311_census.copy()
     if filter_for_311 == "sr_per_1000":
-        output_title = 'Req. per 1k'
+        output_title = 'Avg. Annual Req. per 1k'
     else:
         output_title = 'Days' 
     map_output[output_title] = map_output[filter_for_311]
