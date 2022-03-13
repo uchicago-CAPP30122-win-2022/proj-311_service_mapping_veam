@@ -1,2 +1,4 @@
-,City,total_req,avg_res_time,median_res_time,sr_per_1000
-0,Chicago,2415606,48742.062853003285,5955.625,881.4050486913416
+year,total_reqs,avg_resol_time,median_resol_time,sr_per_1000
+2019,815330,47.15,5.92,297.0
+2020,829919,33.58,3.94,303.0
+2021,766582,19.49,3.13,280.0
