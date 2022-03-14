@@ -811,11 +811,11 @@ def update_scatter(scatter_y, overall_filter, demo, secondary_demo):
                     'Population': ':,'},  
         range_y=[0, max_val],
     )
-    fig_scatter.add_annotation(x=(max(demo_output[output_hover_data])/2), y=max(demo_output[scatter_y]),
+    fig_scatter.add_annotation(x=(max(demo_output[output_hover_data])/2), y=max_val,
             text=f'Correlation Coefficient: {round(corr_coef, 2)}',
             showarrow=False,
             font=dict(size=18))
-    fig_scatter.add_annotation(x=(max(demo_output[output_hover_data])/2), y=max(demo_output[scatter_y])/10*9,
+    fig_scatter.add_annotation(x=(max(demo_output[output_hover_data])/2), y=max_val/20*19,
             text=f'<i>Note: Size of bubble corresponds to population of neighborhood</i>',
             showarrow=False,
             font=dict(size=12))
