@@ -5,7 +5,7 @@ File to take ACS demogrphic data and group into community areas
 import censusdata
 import pandas as pd
 import regex as re
-from 311servicemapping.data_pull.census.create_cca_tract_dict import create_dictionaries 
+from data_pull.census.create_cca_tract_dict import create_dictionaries 
 
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('display.precision', 2)
@@ -92,7 +92,6 @@ def parse_geographic_tract_label(df):
 
     Returns (pd.DataFrame): Demos with new columns for census tract
     '''
-    ############# MORE EFFICIENT WAY HERE FOR SURE
     output = df.copy()
     labels = df.index
     tracts = []
@@ -170,7 +169,6 @@ def get_percentage_info(df):
     output['Native_Hawaiian_or_Other_Pacific_Islander'] = df.Native_Hawaiian_or_Other_Pacific_Islander / df.total_num_race_estimates * 100
     output['some_other_race_alone'] = df.some_other_race_alone / df.total_num_race_estimates * 100
     output['two_or_more_races'] = df.two_or_more_races / df.total_num_race_estimates * 100
-    # output = output.round(2) # Round off data off to two decimal places
     output['cca_num'].astype(int)
     return output
 
