@@ -804,11 +804,12 @@ def update_scatter(scatter_y, overall_filter, demo, secondary_demo):
         title=f"{label_y} vs. Percent {title_label}",
         labels={'%': f"Percent {title_label}",
                 scatter_y: label_y},
+        trendline='ols',
+        trendline_color_override=px.colors.qualitative.Vivid[7],
         hover_data={output_hover_data: ':.2f',
                     scatter_y: True,
                     'Population': ':,'},  
         range_y=[0, max_val],
-        trendline='ols',      
     )
     fig_scatter.add_annotation(x=(max(demo_output[output_hover_data])/2), y=max(demo_output[scatter_y]),
             text=f'Correlation Coefficient: {round(corr_coef, 2)}',
@@ -820,6 +821,7 @@ def update_scatter(scatter_y, overall_filter, demo, secondary_demo):
             font=dict(size=12))
     fig_scatter.update_layout(paper_bgcolor="#0f2537", plot_bgcolor="#0f2537",
                               font_color = '#fff')
+    fig_scatter.update_traces(marker_color=px.colors.qualitative.Vivid[7])
 
     return fig_scatter
 
