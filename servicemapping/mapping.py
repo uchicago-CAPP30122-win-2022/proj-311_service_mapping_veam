@@ -160,7 +160,7 @@ dict_responsetime = {
     }
 
 dict_311_stat = {
-    "sr_per_1000": "Annual Number of 311 Requests (per 1000 people)",
+    "sr_per_1000": "Annual Num. of 311 Requests (per 1000 people)",
     "avg_resol_time": "Avg. 311 Request Resolution Time (days)",
     "median_resol_time": "Median 311 Request Resolution Time (days)"
     }
@@ -189,7 +189,7 @@ dropdown_style_d = {'display': 'inline-block',
                     'text-align': 'center',
                     'font-family': 'Helvetica',
                     'color': '#4c9be8',
-                    'width': '60%'}
+                    'width': '70%'}
 
 # -----------------------------------------------------------
 # App layout
@@ -197,7 +197,7 @@ dropdown_style_d = {'display': 'inline-block',
 demo_map = [
     # Demo map
         html.Br(),
-        dbc.Row(html.H3("Filter: Census Demographics"),style={'text-align': 'center'},justify='center'),
+        dbc.Row(html.H3("Filter: Neighborhood Census Demographics"),style={'text-align': 'center'},justify='center'),
         html.Br(),
         dbc.Row(
             dcc.Dropdown(id="primary_filter",
@@ -227,7 +227,7 @@ demo_map = [
             dcc.Graph(id='demo_map', figure={'layout': {'paper_bgcolor': "#0f2537",
                                                         'plot_bgcolor': "#0f2537"}}, 
                       style = {'display': 'inline-block', 'width': '80vh',
-                               'height': '50vh'},
+                               'height': '80vh'},
                       ),
             justify='center'
             )
@@ -235,14 +235,14 @@ demo_map = [
 resolution_times_graph = [
     # 311 data map
         html.Br(),
-        dbc.Row(html.H3("Filter: 311 Service Request Summary Stats"),style={'text-align': 'center'},justify='center'),
+        dbc.Row(html.H3("Filter: Neighborhood 311 Service Request Statistics"),style={'text-align': 'center'},justify='center'),
         html.Br(),
         html.Br(),
         dbc.Row(
             dcc.Dropdown(id="311_map_filter",
                         options = [{'label': v, 'value':k} for k, v in map_311_filter.items()],
                         multi = False,
-                        value = "sr_per_1000",
+                        value = "median_resol_time",
                         style = dropdown_style_d
                         ),
                 justify='center'
@@ -252,7 +252,7 @@ resolution_times_graph = [
         dbc.Row(
             dcc.Graph(id='311_map', figure={'layout': {'paper_bgcolor': "#0f2537",
                                                         'plot_bgcolor': "#0f2537"}}, 
-                       style = {'display': 'inline-block', 'width': '80vh', 'height': '50vh'}),
+                       style = {'display': 'inline-block', 'width': '80vh', 'height': '80vh'}),
             justify='center'
         )
     ]
@@ -261,7 +261,7 @@ resolution_times_graph = [
 middle_row_content = [
     # For bar graph
     dbc.Row(html.Br()),
-    dbc.Row(html.H3("Filter: Neighborhood for Resolution Times of 311 Requests"),style={'text-align': 'center'},justify='center'),
+    dbc.Row(html.H3("Filter: Neighborhood for Deep Dive on Resolution Times of 311 Requests"),style={'text-align': 'center'},justify='center'),
     dbc.Row(html.Br()),
     dbc.Row(
             dcc.Dropdown(id="bar_cca",
@@ -278,19 +278,19 @@ middle_row_content = [
         dbc.Row(html.Br()),
         dbc.Row(html.Br()),
         dbc.Row(
-                dcc.Graph(id='bar_graph', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '50vh'}),
+                dcc.Graph(id='bar_graph', figure={}, style = {'display': 'inline-block', 'width': '80vh', 'height': '60vh'}),
                 justify='center'
                 )
         ]),
 
     # Neighborhood bar graph
     dbc.Col([
-        dbc.Row(html.H5("Filter: 311 Requests Summary Stats"),style={'text-align': 'center'},justify='center'),
+        dbc.Row(html.H5("Filter: 311 Requests Summary Statistic"),style={'text-align': 'center'},justify='center'),
         dbc.Row(
             dcc.Dropdown(id="bar2_311",
                         options =[{'label': v, 'value':k} for k, v in dict_311_stat.items()],
                         multi = False,
-                        value = 'avg_resol_time',
+                        value = 'median_resol_time',
                         style = dropdown_style_d
                         ),
                         justify='center'
@@ -298,7 +298,7 @@ middle_row_content = [
         dbc.Row(
             dcc.Graph(id='bar2_graph', figure={'layout': {'paper_bgcolor': "#0f2537",
                                                         'plot_bgcolor': "#0f2537"}}, 
-                       style = {'display': 'inline-block', 'width': '80vh', 'height': '50vh'}),
+                       style = {'display': 'inline-block', 'width': '80vh', 'height': '60vh'}),
             justify='center'
             )
         ])
@@ -318,7 +318,7 @@ bottom_row_content = [
 
     dbc.Row([
         dbc.Col([
-            dbc.Row(html.H5("Select a Census Demo"),style={'text-align': 'center'},justify='center'),
+            dbc.Row(html.H5("Select a Census Demographic (X Var)"),style={'text-align': 'center'},justify='center'),
             dbc.Row(
             dcc.Dropdown(id="primary_scatter",
                          options =[
@@ -345,13 +345,13 @@ bottom_row_content = [
                 )
         ]),
         dbc.Col([
-            dbc.Row(html.H5("Select 311 info"),style={'text-align': 'center'},justify='center'),
+            dbc.Row(html.H5("Select 311 info (Y Var)"),style={'text-align': 'center'},justify='center'),
             dbc.Row(
                 # Col: Insert Dropdown 1
                 dcc.Dropdown(id="scatter_y",
                     options =[ {'label': v, 'value': k} for k, v in dict_scatter_y.items()],
                     multi = False,
-                    value = "sr_per_1000",
+                    value = "median_resol_time",
                     style = dropdown_style_d
                     ),
                 justify='center')
@@ -361,7 +361,7 @@ bottom_row_content = [
         # Insert scatterplot map
         dcc.Graph(id='scatter', figure={'layout': {'paper_bgcolor': "#0f2537",
                                             'plot_bgcolor': "#0f2537"}}, 
-            style = {'display': 'inline-block', 'width': '80vh', 'height': '50vh'}),
+            style = {'display': 'inline-block', 'width': '100vh', 'height': '80vh'}),
             justify='center'
         ),
     dbc.Row(html.Br())
@@ -510,7 +510,7 @@ def update_census_map(overall_filter, demo, secondary_demo):
                     'cca_num': False,
                     '%': False},
         range_color=ranges,
-        title=f"% {title_label} by Chicago Neighborhood"
+        title=f"% {title_label}"
         )
     fig.update_geos(fitbounds='locations', visible=False)
     fig.update_layout(paper_bgcolor="#0f2537", font_color = '#fff')
@@ -567,7 +567,7 @@ def update_311_map(filter_for_311):
                     '2nd issue': True,
                     '3rd issue': True,
                     'cca_num_x': False},
-        title=f"{map_311_filter[filter_for_311]} by Chicago Neighborhood"
+        title=f"{map_311_filter[filter_for_311]}"
         )
     fig.update_geos(fitbounds='locations', visible=False)
     fig.update_layout(paper_bgcolor="#0f2537", font_color = '#fff')  
