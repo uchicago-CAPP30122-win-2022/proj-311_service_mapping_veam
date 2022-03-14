@@ -672,7 +672,7 @@ def update_bar(neighborhood, statistic_311):
         color_discrete_sequence=[px.colors.qualitative.Safe[0], px.colors.qualitative.Vivid[7], "#00558c"],
         title=f"{title1_label}: {title2_label}",
         labels={    "Variable": f"{title1_label} vs. Chicago Avg.",
-                    "value": 'Variable',
+                    "value": title2_label,
                     "year": "Year"},
         hover_data={'year': True,
                     'Variable': False,
