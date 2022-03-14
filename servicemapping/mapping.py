@@ -3,7 +3,6 @@ A file to create our website in plotly
 '''
 # TBUs
 # Get clone venv stuff check Lamont later this week: MAC USERS
-# Add a legend showing the bubble size is with population for scatter plot
 # Import smaller modules to get component (Dash documentation models)
 # Doc strings
 # make writeup
@@ -52,6 +51,9 @@ df_311_census['Top 311 issue'] = df_311_census['top_1']
 df_311_census['2nd issue'] = df_311_census['top_2']
 df_311_census['3rd issue'] = df_311_census['top_3']
 df_311_census['sr_per_1000'] = df_311_census['sr_per_1000'] // 3
+
+df_311_census['perc_resol_unresolved'] = df_311_census['perc_resol_unresolved'] * 100
+df_311_census['perc_resol_unresolved'] = df_311_census['perc_resol_unresolved'].round(2)
 
 
 
@@ -812,9 +814,12 @@ def update_scatter(scatter_y, overall_filter, demo, secondary_demo):
             text=f'Correlation Coefficient: {round(corr_coef, 2)}',
             showarrow=False,
             font=dict(size=18))
+    fig_scatter.add_annotation(x=(max(demo_output[output_hover_data])/2), y=max(demo_output[scatter_y])/10*9,
+            text=f'<i>Note: Size of bubble corresponds to population of neighborhood</i>',
+            showarrow=False,
+            font=dict(size=12))
     fig_scatter.update_layout(paper_bgcolor="#0f2537", plot_bgcolor="#0f2537",
-                              font_color = '#fff',
-                              showlegend=True, legend_itemsizing="trace")
+                              font_color = '#fff')
 
     return fig_scatter
 
