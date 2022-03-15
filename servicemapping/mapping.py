@@ -793,6 +793,10 @@ def update_scatter(scatter_y, overall_filter, demo, secondary_demo):
 
     label_y = dict_scatter_y[scatter_y]
 
+    # Set position of scatterplot annotations
+    x_max = max(demo_output[output_hover_data])
+    x_min = min(demo_output[output_hover_data])
+
     corr_coef = demo_output[output_hover_data].corr(demo_output[scatter_y])
 
     fig_scatter = px.scatter(
@@ -811,11 +815,11 @@ def update_scatter(scatter_y, overall_filter, demo, secondary_demo):
                     'Population': ':,'},  
         range_y=[0, max_val],
     )
-    fig_scatter.add_annotation(x=(max(demo_output[output_hover_data])/2), y=max_val,
+    fig_scatter.add_annotation(x=((x_max + x_min)/2), y=max_val,
             text=f'Correlation Coefficient: {round(corr_coef, 2)}',
             showarrow=False,
             font=dict(size=18))
-    fig_scatter.add_annotation(x=(max(demo_output[output_hover_data])/2), y=max_val/20*19,
+    fig_scatter.add_annotation(x=((x_max + x_min)/2), y=max_val/20*19,
             text=f'<i>Note: Size of bubble corresponds to population of neighborhood</i>',
             showarrow=False,
             font=dict(size=12))
