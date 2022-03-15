@@ -306,9 +306,6 @@ middle_row_content = [
     ]
 
 
-dropdown_style_s = dropdown_style_d.copy()
-dropdown_style_s['width'] = '50%'
-
 # Bottom row - scatterplot
 bottom_row_content = [
     dbc.Row(html.Br()),
