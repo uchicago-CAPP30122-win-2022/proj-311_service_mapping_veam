@@ -3,15 +3,9 @@ Graph: Scatterplot
 
 311 Service Mapping Project
 
-Create layout for scatterplot 
-(based on ACS demographics & Chicago 311 service request data)
+Create layout for scatterplot based on ACS demographics & Chicago 311 service
+    request data
 '''
-
-
-# -----------------------------------------------------------
-# Import statements
-# !!!!!! QUESTION: NOT SURE WHAT WE DO OR DO NOT NEED
-# ACTION: UNCOMMENT OUT SCATTER LINE STUFF (just doesn't work on mine)
 
 import dash
 from dash import dcc
@@ -20,13 +14,12 @@ from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
-# import statsmodels
+import statsmodels
 
-# TO DELETE
-# import geopandas as gpd
-# import numpy as np
-
-from webapp.inputs.dicts import *
+from webapp.inputs.dicts import dropdown_style_d, dict_scatter_y, \
+    second_filter, third_filter, income_cols, max_income_tuples, \
+    race_value_to_label, unemployment_value_to_label, \
+    min_income_value_to_label, max_income_value_to_label
 from webapp.inputs.data import df_311_census
 from maindash import app # ACTION: this can be deleted when transferred to __main__
 
@@ -35,21 +28,28 @@ from maindash import app # ACTION: this can be deleted when transferred to __mai
 # Layout - Core Components + Graph
 # Bottom row - scatterplot
 
+filter_header = "Filter: Plotting Census Demographics on 311 Service Request Data"
+
 bottom_row_content = [
     dbc.Row(html.Br()),
     dbc.Row(html.Br()),
-    dbc.Row(html.H3("Filter: Plotting Census Demographics on 311 Service Request Data"),style={'text-align': 'center'},justify='center'),
+    dbc.Row(html.H3(filter_header),style={'text-align': 'center'},
+                    justify='center'),
     dbc.Row(html.Br()),
 
     dbc.Row([
         dbc.Col([
-            dbc.Row(html.H5("Select a Census Demographic (X Var)"),style={'text-align': 'center'},justify='center'),
+            dbc.Row(html.H5("Select a Census Demographic (X Var)"),
+                    style={'text-align': 'center'},justify='center'),
             dbc.Row(
             dcc.Dropdown(id="primary_scatter",
                          options =[
-                            {"label": "Race", "value": "Race"},
-                            {"label": "Range of annual incomes", "value": "Range of annual incomes"},
-                            {"label": "Percent unemployed", "value": "Unemployment"}],
+                            {"label": "Race",
+                             "value": "Race"},
+                            {"label": "Range of annual incomes",
+                             "value": "Range of annual incomes"},
+                            {"label": "Percent unemployed",
+                             "value": "Unemployment"}],
                          multi = False,
                          value = "Race",
                          style = dropdown_style_d,
@@ -70,11 +70,13 @@ bottom_row_content = [
                 )
         ]),
         dbc.Col([
-            dbc.Row(html.H5("Select 311 info (Y Var)"),style={'text-align': 'center'},justify='center'),
+            dbc.Row(html.H5("Select 311 info (Y Var)"),
+                    style={'text-align': 'center'},justify='center'),
             dbc.Row(
-                # Col: Insert Dropdown 1
                 dcc.Dropdown(id="scatter_y",
-                    options =[ {'label': v, 'value': k} for k, v in dict_scatter_y.items()],
+                    options =[ {'label': v,
+                                'value': k}
+                                for k, v in dict_scatter_y.items()],
                     multi = False,
                     value = "median_resol_time",
                     style = dropdown_style_d
@@ -83,10 +85,11 @@ bottom_row_content = [
             ]),
     ]),
     dbc.Row(
-        # Insert scatterplot map
-        dcc.Graph(id='scatter', figure={'layout': {'paper_bgcolor': "#0f2537",
-                                            'plot_bgcolor': "#0f2537"}}, 
-            style = {'display': 'inline-block', 'width': '100vh', 'height': '80vh'}),
+        dcc.Graph(id='scatter',
+                  figure={'layout': {'paper_bgcolor': "#0f2537",
+                          'plot_bgcolor': "#0f2537"}},
+            style = {'display': 'inline-block',
+                     'width': '100vh', 'height': '80vh'}),
             justify='center'
         ),
     dbc.Row(html.Br())
@@ -108,6 +111,14 @@ bottom_row_content = [
 def set_second_options_and_value(option):
     '''
     Updates secondary filter options
+
+    Input:
+        option (str): Primary demographic filter (race / income / unemployment)
+
+    Returns: 3 dash dropdown components for secondary filter:
+        1) options (ddc component): Filter options
+        2) value (ddc component): Default value
+        3) diabled (ddc component): Whether or not you can change the filter
     '''
     options = [{'label': k, 'value': v} for k,v in second_filter[option].items()]
     disabled = False
@@ -127,6 +138,17 @@ def set_second_options_and_value(option):
 def set_third_options(option, first_filter):
     '''
     Updates third filter options
+
+    Inputs:
+        first_filter (str): Primary demographic filter (race / income /
+            unemployment)
+        option (str): Secondary demographic filter (type of race /
+            min income level)
+
+    Returns: 3 dash dropdown components for tertiary filter:
+        1) options (ddc component): Filter options
+        2) value (ddc component): Default value
+        3) diabled (ddc component): Whether or not you can change the filter
     '''
     if first_filter != 'Range of annual incomes':
         options =  [{'label': k, 'value': v} for k,v in third_filter[first_filter].items()]
@@ -149,6 +171,18 @@ def set_third_options(option, first_filter):
 def update_scatter(scatter_y, overall_filter, demo, secondary_demo):
     '''
     Updates scatter plot based on demo selected
+
+    Inputs:
+        scatter_y (str): 311 data to use as target for correlation
+        overall_filter (str): Primary demographic filter (race / income /
+            unemployment)
+        demo (str): Secondary demographic filter (type of race /
+            min income level)
+        secondary_demo (str): Max income level (if applicable)
+
+    Returns:
+        fig_scatter(px.scatter): Scatterplot of 311 info vs. demo info for
+            Chicago neighborhoods
     '''
     if overall_filter == 'Race':
         output_col = df_311_census[demo].copy()
@@ -172,24 +206,24 @@ def update_scatter(scatter_y, overall_filter, demo, secondary_demo):
     # Set up title info and output_col_title
     if overall_filter == 'Race':
         title_label = race_value_to_label[demo]
-        output_hover_data = "% " + title_label # Create column name for hover_data
+        output_hover_data = "% " + title_label
         demo_output[output_hover_data] = demo_output['output_col']
     elif overall_filter == 'Unemployment':
         title_label = unemployment_value_to_label[demo]
-        output_hover_data = '% Unemp.' # Create column name for hover_data
+        output_hover_data = '% Unemp.'
         demo_output[output_hover_data] = demo_output['output_col']
     else:
         min_label = min_income_value_to_label[demo]
         max_label = max_income_value_to_label[secondary_demo]
         if max_label == "No max":
             title_label = "making over " + min_label + " per year"
-            output_hover_data = '% >' + min_label # Create column name for hover_data
+            output_hover_data = '% >' + min_label
             demo_output[output_hover_data] = demo_output['output_col']
         else:
             title_label = "making between " + min_label + " - " + max_label + " per year"
-            output_hover_data = "% b/t " + min_label + " - " + max_label # Create column name for hover_data
+            output_hover_data = "% b/t " + min_label + " - " + max_label
             demo_output[output_hover_data] = demo_output['output_col']
-    
+
     # Set the actual reference column
     demo_output['%'] = demo_output[output_hover_data]
 
@@ -219,11 +253,11 @@ def update_scatter(scatter_y, overall_filter, demo, secondary_demo):
         title=f"{label_y} vs. Percent {title_label}",
         labels={'%': f"Percent {title_label}",
                 scatter_y: label_y},
-        # trendline='ols',
-        # trendline_color_override=px.colors.qualitative.Vivid[7],
+        trendline='ols',
+        trendline_color_override=px.colors.qualitative.Vivid[7],
         hover_data={output_hover_data: ':.2f',
                     scatter_y: True,
-                    'Population': ':,'},  
+                    'Population': ':,'},
         range_y=[0, max_val],
     )
 
@@ -231,8 +265,9 @@ def update_scatter(scatter_y, overall_filter, demo, secondary_demo):
             text=f'Correlation Coefficient: {round(corr_coef, 2)}',
             showarrow=False,
             font=dict(size=18))
+    note = "Note: Size of bubble corresponds to population of neighborhood"
     fig_scatter.add_annotation(x=((x_max + x_min)/2), y=max_val/20*19,
-            text=f'<i>Note: Size of bubble corresponds to population of neighborhood</i>',
+            text=f'<i>{note}</i>',
             showarrow=False,
             font=dict(size=12))
     fig_scatter.update_layout(paper_bgcolor="#0f2537", plot_bgcolor="#0f2537",

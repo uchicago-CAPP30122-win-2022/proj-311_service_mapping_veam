@@ -1,14 +1,19 @@
-# Creating a dictionary that maps census tract to community area (neighborhood)
+'''
+Data pull: Census
 
+311 Service Mapping Project
+
+Creates a dictionary that maps census tract to community area (neighborhood)
+'''
 import pandas as pd
 
 def create_dictionaries():
     '''
     Creates a dictionary for (i) Chicago community areas + census tracts
                              (ii) CCA number to name
-    
+
     Inputs: None
-    
+
     Returns (dictionary): Tract: community area;
     '''
     # Read in data (CSV)
@@ -27,7 +32,7 @@ def create_dictionaries():
         tract = row["TRACTCE10"] / 100 #Final two digits are block group
         cca = row["COMMAREA"]
         tract_cca_dict[tract] = cca
-    
+
     comm_area_dict = {}
 
     for row in comm_area.iloc:

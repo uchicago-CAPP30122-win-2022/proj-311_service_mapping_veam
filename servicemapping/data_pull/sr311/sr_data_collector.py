@@ -1,4 +1,8 @@
 '''
+Data pull: Chicago Data Portal (311 Service Requests)
+
+311 Service Mapping Project
+
 File to pull 311 Service Request data for 2019-2021 from Chicago Data Portal
 '''
 
@@ -6,7 +10,14 @@ import pandas as pd
 from sodapy import Socrata
 
 def retrieve_data():
-    
+    '''
+    Retreives Chicago 311 Service Request data for 2019-2021 from Chicago Data
+        Portal
+
+    Input: None
+
+    Returns (pd.DataFrame): Chicagl 311 data
+    '''
     print("Establishing connection with Chicago Data portal...")
 
     # Data Portal details
@@ -15,13 +26,13 @@ def retrieve_data():
     app_token = "6tRoBirkYQMdr8MMFR8FzgBXq"
     api_username = "v4vigtory@gmail.com"
     api_password = "311_TeamVeam"
-    client = Socrata(socrata_domain, app_token, 
-                    username=api_username, 
+    client = Socrata(socrata_domain, app_token,
+                    username=api_username,
                     password=api_password)
-    
+
     print("Pulling 2021 Service Request data from Chicago Data portal")
 
-    # breaking up data collection by year to modularize API pull 
+    # breaking up data collection by year to modularize API pull
     sr_2021 = client.get(socrata_dataset_identifier,
                      select = '''
                         sr_number, sr_type, sr_short_code, 
@@ -33,9 +44,10 @@ def retrieve_data():
                      where = '''
                         date_extract_y(created_date) = 2021 AND 
                         community_area IS NOT NULL AND 
-                        sr_type NOT IN ('311 INFORMATION ONLY CALL', 'Aircraft Noise Complaint')''',
+                        sr_type NOT IN ('311 INFORMATION ONLY CALL',
+                                        'Aircraft Noise Complaint')''',
                      limit = 10000000)
-    
+
     print("2021 Service Request Data Pull Successful!")
 
     print("Pulling 2020 Service Request data from Chicago Data portal")
@@ -51,7 +63,8 @@ def retrieve_data():
                      where = '''
                         date_extract_y(created_date) = 2020 AND 
                         community_area IS NOT NULL AND 
-                        sr_type NOT IN ('311 INFORMATION ONLY CALL', 'Aircraft Noise Complaint')''', 
+                        sr_type NOT IN ('311 INFORMATION ONLY CALL',
+                                        'Aircraft Noise Complaint')''',
                      limit = 10000000)
 
     print("2020 Service Request Data Pull Successful!")
@@ -69,7 +82,8 @@ def retrieve_data():
                      where = '''
                         date_extract_y(created_date) = 2019 AND 
                         community_area IS NOT NULL AND 
-                        sr_type NOT IN ('311 INFORMATION ONLY CALL', 'Aircraft Noise Complaint')''',
+                        sr_type NOT IN ('311 INFORMATION ONLY CALL',
+                                        'Aircraft Noise Complaint')''',
                      limit = 10000000)
 
     print("2019 Service Request Data Pull Successful!")

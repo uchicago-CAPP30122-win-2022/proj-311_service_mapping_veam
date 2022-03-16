@@ -1,14 +1,12 @@
 '''
-Dictionaries & Lists
+Inputs: Dictionaries & Lists
 
 311 Service Mapping Project
 
-Purpose: Hold dictionaries used for Dash Plotly data visualizations
+Create and store dictionaries used for Dash Plotly data visualizations
 '''
-# -----------------------------------------------------------
-# Import statements
-from data_pull.census.create_cca_tract_dict import create_dictionaries
 
+from data_pull.census.create_cca_tract_dict import create_dictionaries
 
 # -----------------------------------------------------------
 # Dictionaries
@@ -29,14 +27,6 @@ neighborhoods = []
 for neighbordhood in comm_area_dict.values():
     neighborhoods.append(neighbordhood)
 neighborhoods = sorted(neighborhoods)
-
-# Set up dictionaries for filtering data
-# QUESTION: do we need these lists below? THey're not used anywhere else
-# race_cols = ["White", "Black_or_African_American",
-#              "American_Indian_or_Alaska_Native", "Asian",
-#              "Native_Hawaiian_or_Other_Pacific_Islander",
-#              "some_other_race_alone", "two_or_more_races"]
-# unemployment_cols = ['percent_unemployed']
 
 # Lists: Income Dropdowns
 income_cols = ["LTM_income_sub_10k", "LTM_income_10-15k", "LTM_income_15_20k",
@@ -67,7 +57,8 @@ race_label_to_value = {"White": "White",
                        "Black": "Black_or_African_American",
                        "Native American": "American_Indian_or_Alaska_Native",
                        "Asian": "Asian",
-                       "Native Hawaiian / Pacific Islander": "Native_Hawaiian_or_Other_Pacific_Islander",
+                       "Native Hawaiian / Pacific Islander":
+                            "Native_Hawaiian_or_Other_Pacific_Islander",
                        "Other single race": "some_other_race_alone",
                        "2+ races": "two_or_more_races"}
 race_value_to_label = {v: k for k,v in race_label_to_value.items()}

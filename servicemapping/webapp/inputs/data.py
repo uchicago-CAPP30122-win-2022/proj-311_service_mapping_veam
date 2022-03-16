@@ -1,13 +1,11 @@
 '''
-Data
+Inputs: Data
 
 311 Service Mapping Project
 
-Purpose: Hold datasets & data cleaning for Dash Plotly data visualization
+Clean and store datasets for Dash Plotly data visualization
 '''
 
-# -----------------------------------------------------------
-# Import statements
 import pandas as pd
 import geopandas as gpd
 
@@ -42,6 +40,10 @@ service_311_bar['sr_per_1000'] = 1000 * (service_311_bar['total_reqs'] /
 # -----------------------------------------------------------
 # Data Cleaning (for visualization)
 
+# Change percent resolutions unresolved to percentage points vs. decimal
+# e.g. to 9.70 from .097
+df_311_census['perc_resol_unresolved'] = df_311_census['perc_resol_unresolved'] * 100
+
 # Round data off
 for df in [service_311_bar, df_311_census]:
     df['avg_resol_time'] = df['avg_resol_time']/(24*60)
@@ -49,13 +51,12 @@ for df in [service_311_bar, df_311_census]:
     df['median_resol_time'] = df['median_resol_time']/(24*60)
     df['median_resol_time'] = df['median_resol_time'].round(2)
     df['sr_per_1000'] = df['sr_per_1000'].round(0)
+    df_311_census['perc_resol_unresolved'] = df_311_census['perc_resol_unresolved'].round(2)
 
-# Add in top 311 requests
+# Rename top 311 issue column titles
 df_311_census['Top 311 issue'] = df_311_census['top_1']
 df_311_census['2nd issue'] = df_311_census['top_2']
 df_311_census['3rd issue'] = df_311_census['top_3']
-df_311_census['sr_per_1000'] = df_311_census['sr_per_1000'] // 3
 
-# Change units
-df_311_census['perc_resol_unresolved'] = df_311_census['perc_resol_unresolved'] * 100
-df_311_census['perc_resol_unresolved'] = df_311_census['perc_resol_unresolved'].round(2)
+# Make service request per 1000 on annual basis vs. 3 year total
+df_311_census['sr_per_1000'] = df_311_census['sr_per_1000'] // 3
