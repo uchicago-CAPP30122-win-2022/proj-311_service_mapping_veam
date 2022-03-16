@@ -6,6 +6,9 @@ Data pull: Census
 Creates a dictionary that maps census tract to community area (neighborhood)
 '''
 import pandas as pd
+import os.path as path
+
+absolute_path_dir = path.abspath(path.join(__file__ ,"../../.."))
 
 def create_dictionaries():
     '''
@@ -17,10 +20,10 @@ def create_dictionaries():
     Returns (dictionary): Tract: community area;
     '''
     # Read in data (CSV)
-    census_tracts_raw = pd.read_csv("data/census_tracts_2010.csv", header=0, index_col="GEOID10")
+    census_tracts_raw = pd.read_csv(absolute_path_dir + "/data/census_tracts_2010.csv", header=0, index_col="GEOID10")
     census_tracts = census_tracts_raw.loc[:, ['TRACTCE10', 'COMMAREA']]
 
-    comm_area_raw = pd.read_csv("data/CommAreas.csv", header=0)
+    comm_area_raw = pd.read_csv(absolute_path_dir + "/data/CommAreas.csv", header=0)
     comm_area = comm_area_raw.loc[:, ['AREA_NUM_1', 'COMMUNITY']]
 
     # Confirm no duplicates (there shouldn't be any)

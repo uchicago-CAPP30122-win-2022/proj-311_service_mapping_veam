@@ -6,7 +6,7 @@ Inputs: Dictionaries & Lists
 Create and store dictionaries used for Dash Plotly data visualizations
 '''
 
-from data_pull.census.create_cca_tract_dict import create_dictionaries
+from servicemapping.data_pull.census.create_cca_tract_dict import create_dictionaries
 
 # -----------------------------------------------------------
 # Dictionaries

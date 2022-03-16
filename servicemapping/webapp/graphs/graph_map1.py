@@ -13,12 +13,12 @@ from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 import plotly.express as px
 
-from webapp.inputs.dicts import dropdown_style_d, second_filter, \
+from servicemapping.webapp.inputs.dicts import dropdown_style_d, second_filter, \
     third_filter, income_cols, max_income_tuples, race_value_to_label, \
     unemployment_value_to_label, min_income_value_to_label, \
     max_income_value_to_label
-from webapp.inputs.data import census_data, geojson
-from maindash import app
+from servicemapping.webapp.inputs.data import census_data, geojson
+from servicemapping.maindash import app
 
 
 # -----------------------------------------------------------

@@ -14,10 +14,10 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 import pandas as pd
 
-from webapp.inputs.dicts import neighborhood_to_cca_num, neighborhoods, \
+from servicemapping.webapp.inputs.dicts import neighborhood_to_cca_num, neighborhoods, \
     dropdown_style_d, dict_311_stat, dict_responsetime, comm_area_dict
-from webapp.inputs.data import service_311_bar, chicago_311_avg
-from maindash import app
+from servicemapping.webapp.inputs.data import service_311_bar, chicago_311_avg
+from servicemapping.maindash import app
 
 
 # -----------------------------------------------------------

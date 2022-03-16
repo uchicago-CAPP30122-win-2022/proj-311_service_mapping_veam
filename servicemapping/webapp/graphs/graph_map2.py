@@ -13,9 +13,9 @@ from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 import plotly.express as px
 
-from webapp.inputs.dicts import map_311_filter, dropdown_style_d
-from webapp.inputs.data import df_311_census, geojson
-from maindash import app
+from servicemapping.webapp.inputs.dicts import map_311_filter, dropdown_style_d
+from servicemapping.webapp.inputs.data import df_311_census, geojson
+from servicemapping.maindash import app
 
 
 # -----------------------------------------------------------

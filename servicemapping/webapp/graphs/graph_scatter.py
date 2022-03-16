@@ -16,12 +16,12 @@ import plotly.express as px
 import pandas as pd
 import statsmodels
 
-from webapp.inputs.dicts import dropdown_style_d, dict_scatter_y, \
+from servicemapping.webapp.inputs.dicts import dropdown_style_d, dict_scatter_y, \
     second_filter, third_filter, income_cols, max_income_tuples, \
     race_value_to_label, unemployment_value_to_label, \
     min_income_value_to_label, max_income_value_to_label
-from webapp.inputs.data import df_311_census
-from maindash import app
+from servicemapping.webapp.inputs.data import df_311_census
+from servicemapping.maindash import app
 
 
 # -----------------------------------------------------------
