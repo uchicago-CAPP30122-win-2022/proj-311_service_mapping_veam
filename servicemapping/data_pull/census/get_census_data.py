@@ -9,7 +9,7 @@ File to take ACS demogrphic data and group into community areas
 import censusdata
 import pandas as pd
 import regex as re
-from data_pull.census.create_cca_tract_dict import create_dictionaries
+from create_cca_tract_dict import create_dictionaries
 
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('display.precision', 2)
