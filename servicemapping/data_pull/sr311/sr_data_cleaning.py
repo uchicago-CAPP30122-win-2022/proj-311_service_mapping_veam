@@ -6,12 +6,12 @@ Data pull: Chicago Data Portal (311 Service Requests)
 File to clean 311 Service Request Data to make it available for Dash visualizations
 '''
 
-from data_pull.sr311.sr_data_collector import retrieve_data
+from servicemapping.data_pull.sr311.sr_data_collector import retrieve_data
 import pandas as pd
 import numpy as np
 
-census_pop_data = pd.read_csv("data/census_demos_pop.csv")
-census_demo_data = pd.read_csv("data/census_demos.csv")
+census_pop_data = pd.read_csv("servicemapping/data/census_demos_pop.csv")
+census_demo_data = pd.read_csv("servicemapping/data/census_demos.csv")
 
 def get_data():
     '''
@@ -258,20 +258,20 @@ if __name__ == '__main__':
 
     df_added_cols = create_derived_cols(df)
     df_viz_4 = create_agg_chart_df(df_added_cols)
-    write_csv(df_viz_4, 'data/311_census_bar.csv')
+    write_csv(df_viz_4, 'servicemapping/data/311_census_bar.csv')
 
-    print("Data for Bar Chart created as data/311_census_bar.csv")
+    print("Data for Bar Chart created as servicemapping/data/311_census_bar.csv")
 
     print("Combining 311 SR data with Census data for Map and Scatter plot")
 
     sr_census_df = create_sr_census_df(df, census_pop_data, census_demo_data)
-    write_csv(sr_census_df, 'data/sr_census_df.csv')
+    write_csv(sr_census_df, 'servicemapping/data/sr_census_df.csv')
 
-    print("Data for Bar Chart created as data/sr_census_df.csv")
+    print("Data for Bar Chart created as servicemapping/data/sr_census_df.csv")
 
     print("Preparing overall Chicago numbers for comparison")
 
     chicago_df = create_static_df(df,census_pop_data)
-    write_csv(chicago_df, 'data/chicago_df.csv')
+    write_csv(chicago_df, 'servicemapping/data/chicago_df.csv')
 
-    print("Data created as data/chicago_df.csv")
+    print("Data created as servicemapping/data/chicago_df.csv")

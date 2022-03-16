@@ -48,9 +48,9 @@ def retrieve_data():
     # convert to pandas dataframe
     sr_sample_df = pd.DataFrame(sr_sample)
 
-    print("API data-pull Successful! You can find the data under data/sr_sample_raw.csv")
+    print("API data-pull Successful! You can find the data under servicemapping/data/sr_sample_raw.csv")
 
-    return sr_sample_df.to_csv("data/sr_sample_raw.csv")
+    return sr_sample_df.to_csv("servicemapping/data/sr_sample_raw.csv")
 
 if __name__ == '__main__':
     retrieve_data()
