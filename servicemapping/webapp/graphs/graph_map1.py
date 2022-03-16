@@ -18,7 +18,7 @@ from webapp.inputs.dicts import dropdown_style_d, second_filter, \
     unemployment_value_to_label, min_income_value_to_label, \
     max_income_value_to_label
 from webapp.inputs.data import census_data, geojson
-from maindash import app # ACTION: this can be deleted when transferred to __main__
+from maindash import app
 
 
 # -----------------------------------------------------------

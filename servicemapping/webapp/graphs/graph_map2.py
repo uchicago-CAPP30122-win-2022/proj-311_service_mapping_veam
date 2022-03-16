@@ -15,7 +15,7 @@ import plotly.express as px
 
 from webapp.inputs.dicts import map_311_filter, dropdown_style_d
 from webapp.inputs.data import df_311_census, geojson
-from maindash import app # ACTION: this can be deleted when transferred to __main__
+from maindash import app
 
 
 # -----------------------------------------------------------

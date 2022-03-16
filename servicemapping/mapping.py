@@ -13,7 +13,7 @@ from webapp.graphs.graph_map1 import demo_map
 from webapp.graphs.graph_map2 import resolution_times_graph
 from webapp.graphs.graph_bars import middle_row_content
 from webapp.graphs.graph_scatter import bottom_row_content
-from maindash import app # ACTION: this can be deleted when transferred to __main__
+from maindash import app
 
 
 # -----------------------------------------------------------
@@ -38,6 +38,5 @@ app.layout = dbc.Container([
     ,fluid=True, style={'backgroundColor':'#0f2537'}
     )
 
-# # ACTION: Do we put this in main, or leave here?
 if __name__ == '__main__':
     app.run_server(debug=True)

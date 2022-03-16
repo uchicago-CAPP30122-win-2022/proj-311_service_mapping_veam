@@ -17,7 +17,7 @@ import pandas as pd
 from webapp.inputs.dicts import neighborhood_to_cca_num, neighborhoods, \
     dropdown_style_d, dict_311_stat, dict_responsetime, comm_area_dict
 from webapp.inputs.data import service_311_bar, chicago_311_avg
-from maindash import app # ACTION: this can be deleted when transferred to __main__
+from maindash import app
 
 
 # -----------------------------------------------------------
