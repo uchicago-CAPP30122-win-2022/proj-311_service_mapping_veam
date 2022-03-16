@@ -8,19 +8,19 @@ Description: Using 311 Service Request information from the Chicago data portal,
 
 **NOTE:** All codes to be run from within the `servicemapping/` directory
 
-### Setting up Virtual Environment and installing required packages
+### Setting up Virtual Environment and installing required packages:
 1. Clone this repo
 2. From within `servicemapping/` run `sh install.sh`
 3. Access virtual environment through `source env/bin/activate`
 
-### Viewing Dashboard
-1. Run `python3 -m mapping`
+### Viewing Dashboard:
+1. Run `python3 -m mapping` (takes ~2 minutes)
 2. Follow the generated URL link
 
-### (Optional) Pulling Data from Chicago Data Portal
+### (Optional) Pulling Data from Data Portals
 
 #### To view sample data API-pull from Chicago City Data portal: 
-1. Run `python3 -m data_pull.sr311.sr_sample_data_collector`
+1. Run `python3 -m data_pull.sr311.sr_sample_data_collector` 
 2. Sample dataset created is stored in `servicemapping/data/sr_sample_raw.csv`
 
 #### To view census data API-pull from American Community Survey:
@@ -29,4 +29,4 @@ Description: Using 311 Service Request information from the Chicago data portal,
 
 #### To recreate underlying datasets - by re-pulling Service Request data from Chicago City portal: (Run Time: ~5 mins)
 1. Run `python3 -m data_pull.sr311.sr_data_cleaning`
-2. 3 datasets (`311_census_bar.csv`, `sr_census_df` and `chicago_df`) are created and stored in `servicemapping/data/`
+2. 3 datasets (`311_census_bar.csv`, `sr_census_df.csv` and `chicago_df.csv`) are created and stored in `servicemapping/data/`
