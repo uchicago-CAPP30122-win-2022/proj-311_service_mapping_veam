@@ -208,4 +208,4 @@ def get_percentage_info(df):
     return output
 
 if __name__ == '__main__':
-    go(filepath="data/census_population.csv", percentage=False)
+    go(filepath="data/census_demos.csv", percentage=True)
