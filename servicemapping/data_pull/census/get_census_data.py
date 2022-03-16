@@ -9,14 +9,19 @@ File to take ACS demogrphic data and group into community areas
 import censusdata
 import pandas as pd
 import regex as re
+import os.path as path
 from create_cca_tract_dict import create_dictionaries
 
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('display.precision', 2)
 
+absolute_path_dir = path.abspath(path.join(__file__ ,"../../.."))
+
 tract_cca_d, comm_area_dict = create_dictionaries()
 
-def go(filepath="data/census_demos.csv", percentage=True):
+default_path = absolute_path_dir + "/data/census_demos.csv"
+
+def go(filepath=default_path, percentage=True):
     '''
     Runs the files functions to return a df of demos grouped by cca
 
@@ -47,7 +52,7 @@ def get_data_tract_acs():
 
     Returns (pd.DataFrame): tract level demographics for cook county, IL
     '''
-    # Tables used
+    # Tables used detail (prints out columns available with titles)
     # censusdata.printtable(censusdata.censustable('acs5', 2015, 'B23025'))
     # censusdata.printtable(censusdata.censustable('acs5', 2015, 'B19013'))
     # censusdata.printtable(censusdata.censustable('acs5', 2015, 'B19001'))
@@ -208,4 +213,5 @@ def get_percentage_info(df):
     return output
 
 if __name__ == '__main__':
-    go(filepath="data/census_demos.csv", percentage=True)
+    go(filepath=default_path, percentage=True)
+    print(default_path, "updated")
