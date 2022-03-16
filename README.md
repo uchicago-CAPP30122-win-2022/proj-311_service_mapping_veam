@@ -1,6 +1,6 @@
 # 311 Service Mapping
 ## CAPP 122 Course Project | Winter 2022
-## Team members: Vignesh Venkatachalam, Eujene Yum, Angela The, Matt Kaufmann
+### Team members: Vignesh Venkatachalam, Eujene Yum, Angela The, Matt Kaufmann
 
 Using 311 Service Request information from the Chicago data portal, we analyze each neighborhood’s “responsiveness” to requests. We are using 311 data from 2019 to 2021 in order to capture a pre-peak-decline analysis of the pandemic impacts, and also layer in socio-economic information such as unemployment, income, and race. Our aim is to understand if there are discernable relationships between a neighborhood's demographic composition and responsiveness, types of issues, and any impact that COVID may have had on these metrics.
 
@@ -55,10 +55,10 @@ The WebApp has 3 main views that one can interact with:
 
 **1. Responsiveness Map:**
   1. On the left map, user can select specific demographic filters (and sub-filters) such as Race, Income Range and % Unemployed. The heatmap (and corresponding color gradation) will dynamically update for all Chicago community areas. Hovering over any community area shows the community area name and the corresponding metric value
-  2. On the right map, user can choose from one of the 3 responsiveness metrics: Median Resolution Time, Avergage Resolution Time, Average Annual Service Requests per 1000 people, and the heat map will dynamically update for all Chicago community areas. **Hovering over any community area shows a tool-tip with community area name, the corresponding metric value and the Top-3 service requests for that particular community area in the past 3 years**
+  2. On the right map, user can choose from one of the 3 responsiveness metrics: Median Resolution Time, Average Resolution Time, Average Annual Service Requests per 1000 people, and the heat map will dynamically update for all Chicago community areas. **Hovering over any community area shows a tool-tip with community area name, the corresponding metric value and the Top-3 service requests for that particular community area in the past 3 years**
 
 **2. Community Area Deep dive:**
 User can **use the drop down to choose** the community area of interest, for which % of requests completed in different time buckets is shown for each year from 2019 to 2021. The bar chart also shows the % of issues unresolved. User can **click on any of the legends for the year** to view data for only a particular year or any pair of years. We've also provided a visual to compare the Median Request Resolution Time of the Community Area with Chicago as a whole
 
 **3. Scatter Plot comparing responsiveness to Demographics**
-User can **use the drop down to choose** the demographic attribute (Race, Income Range and % Unemployed) and the responsiveness metrics (Median Resolution Time, Avergage Resolution Time, Average Annual Service Requests per 1000 people) of interest, and the **scatterplot dynamically updates to show a scatter plot of responsive metrics vs demographic attribute values, along with the trend line**. Each bubble in the scatterplot corresponds to a community area, with its size indicating the population of the community area. Specific values can be gathered by hovering over the bubble.
+User can **use the drop down to choose** the demographic attribute (Race, Income Range and % Unemployed) and the responsiveness metrics (Median Resolution Time, Average Resolution Time, Average Annual Service Requests per 1000 people) of interest, and the **scatterplot dynamically updates to show a scatter plot of responsive metrics vs demographic attribute values, along with the trend line**. Each bubble in the scatterplot corresponds to a community area, with its size indicating the population of the community area. Specific values can be gathered by hovering over the bubble.
