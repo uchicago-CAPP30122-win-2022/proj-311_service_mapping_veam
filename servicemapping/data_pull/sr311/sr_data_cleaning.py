@@ -185,8 +185,8 @@ def create_sr_census_df(df, census_pop_data, census_demo_data):
                    right_on='cca_num',
                    how='left')
     # add calculated column
-    sr_pop_df["sr_per_1000"] = sr_pop_df.total_reqs / (
-        sr_pop_df.total_num_race_estimates * 1000)
+    sr_pop_df["sr_per_1000"] = (sr_pop_df.total_reqs / 
+        sr_pop_df.total_num_race_estimates) * 1000
 
     sr_pop_demo_df = pd.merge(sr_pop_df,
                    census_demo_data,
